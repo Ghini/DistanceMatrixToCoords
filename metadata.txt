@@ -1,0 +1,39 @@
+# This file contains metadata for your plugin. Since 
+# version 2.0 of QGIS this is the proper way to supply 
+# information about a plugin. The old method of 
+# embedding metadata in __init__.py will 
+# is no longer supported since version 2.0.
+
+# This file should be included when you package your plugin.# Mandatory items:
+
+[general]
+name=GhiniTreePositioner
+qgisMinimumVersion=2.0
+description=Calculate point positions in 2D given a few reference points and a matrix of mutual horizontal distances
+version=0.1
+author=Mario Frasca
+email=mario@anche.no
+
+about=This plugin solves the problem of estimating accurate positions for trees under a thick canopy, or for locations where high resolution aereal photos are not available. Points need a 'id' property, and the reference system needs be in the same units as the measured mutual distances. Mutual distances are given in the form of a dictionary of dictionaries of numerical values: one numerical value for each edge of which we have the measurement. The outer dictionary is indexed on the 'id' of the first end of the edge, the inner dictionary is indexed on the 'id' of the second end of the edge, the numerical value is the distance of the edge. Points are added to the vector layer containing the initial few reference points.
+
+tracker=github.com/Ghini/treepositioner/issues
+repository=github.com/Ghini/treepositioner
+# End of mandatory metadata
+
+# Recommended items:
+
+# Uncomment the following line and add your changelog:
+# changelog=
+
+# Tags are comma separated with spaces allowed
+tags=
+
+homepage=ghini.github.io
+category=Plugins
+icon=icon.png
+# experimental flag
+experimental=True
+
+# deprecated flag (applies to the whole plugin, not just a single version)
+deprecated=False
+
