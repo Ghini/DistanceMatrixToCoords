@@ -6,3 +6,5 @@
 */*/*~
 help/build
 .noseids
+
+resources.py

@@ -193,17 +193,16 @@ class DistanceMatrixToCoords:
         result = self.dlg.exec_()
         # See if OK was pressed
         if result:
-            ## these values should come from the layer
-            points = {
-                '13': {'id': '13', 'type': 'Point', 'coordinates': [690514,720254]},
-                '14': {'id': '14', 'type': 'Point', 'coordinates': [690514,720408]},
-                '15': {'id': '15', 'type': 'Point', 'coordinates': [690514,720562]},
-                '22': {'id': '22', 'type': 'Point', 'coordinates': [690360,720100]},
-                '32': {'id': '32', 'type': 'Point', 'coordinates': [690206,720100]},
-                '42': {'id': '42', 'type': 'Point', 'coordinates': [690052,720100]},
-                '51': {'id': '51', 'type': 'Point', 'coordinates': [689898,719946]},
-                '55': {'id': '55', 'type': 'Point', 'coordinates': [689898,720562]},
-            }
+            ## we should check there is an active layer
+            layer = self.iface.activeLayer()
+            ## get reference points from the layer
+            points = {}
+            for feature in layer.getFeatures():
+                # target coordinates system should come from layer
+                transf = QgsCoordinateTransform(QgsCoordinateReferenceSystem(4326), QgsCoordinateReferenceSystem(3117))
+                easting_northing = transf.transform(feature.geometry().asPoint())
+                point_id = feature['id']
+                points[point_id] = {'id': point_id, 'coordinates': easting_northing}
 
             ## these values should come from the input files
             distances = {
@@ -262,7 +261,6 @@ class DistanceMatrixToCoords:
                         heap.reprioritize(neighbour)
 
             ## layer name should be from active layer
-            layer = QgsMapLayerRegistry.instance().mapLayers()['beacons20170101115312666']
             layer.startEditing()
 
             ## source coordinate reference system should be from active layer
@@ -270,10 +268,15 @@ class DistanceMatrixToCoords:
 
             featureList = []
             ## now add the computed points to the layer
-            for (x, y) in [p['coordinates'] for p in points.values() if p['computed']]:
+            for p in [p for p in points.values() if p['computed']]:
+                x, y = p['coordinates']
                 feature = QgsFeature()
                 layerPoint = transf.transform(QgsPoint(x, y))
                 feature.setGeometry(QgsGeometry.fromPoint(layerPoint))
+                try:
+                    feature['id'] = p['id']
+                except Exception, e:
+                    print type(e), e
                 featureList.append(feature)
 
             layer.dataProvider().addFeatures(featureList)
