@@ -21,7 +21,7 @@
  ***************************************************************************/
 """
 from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication
-from PyQt4.QtGui import QAction, QIcon
+from PyQt4.QtGui import QAction, QIcon, QFileDialog
 # Initialize Qt resources from file resources.py
 import resources
 # Import the code for the dialog
@@ -63,13 +63,16 @@ class DistanceMatrixToCoords:
             if qVersion() > '4.3.3':
                 QCoreApplication.installTranslator(self.translator)
 
-
+        # Create the dialog (after translation) and keep reference
+        self.dlg = DistanceMatrixToCoordsDialog()
         # Declare instance attributes
         self.actions = []
         self.menu = self.tr(u'&GhiniTreePositioner')
         # TODO: We are going to let the user set this up in a future iteration
         self.toolbar = self.iface.addToolBar(u'DistanceMatrixToCoords')
         self.toolbar.setObjectName(u'DistanceMatrixToCoords')
+        self.dlg.lineEdit.clear()
+        self.dlg.pushButton.clicked.connect(self.select_input_file)
 
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
@@ -85,7 +88,6 @@ class DistanceMatrixToCoords:
         """
         # noinspection PyTypeChecker,PyArgumentList,PyCallByClass
         return QCoreApplication.translate('DistanceMatrixToCoords', message)
-
 
     def add_action(
         self,
@@ -137,9 +139,6 @@ class DistanceMatrixToCoords:
         :rtype: QAction
         """
 
-        # Create the dialog (after translation) and keep reference
-        self.dlg = DistanceMatrixToCoordsDialog()
-
         icon = QIcon(icon_path)
         action = QAction(icon, text, parent)
         action.triggered.connect(callback)
@@ -173,7 +172,6 @@ class DistanceMatrixToCoords:
             callback=self.run,
             parent=self.iface.mainWindow())
 
-
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""
         for action in self.actions:
@@ -184,33 +182,42 @@ class DistanceMatrixToCoords:
         # remove the toolbar
         del self.toolbar
 
+    def select_input_file(self):
+        filename = QFileDialog.getOpenFileName(self.dlg, "Select distances file ","", '*.csv')
+        self.dlg.lineEdit.setText(filename)        
 
     def run(self):
         """Run method that performs all the real work"""
+        layers = self.iface.legendInterface().layers()
+        layer_list = []
+        for layer in layers:
+            layer_list.append(layer.name())
+        self.dlg.comboBox.addItems(layer_list)
         # show the dialog
         self.dlg.show()
         # Run the dialog event loop
         result = self.dlg.exec_()
         # See if OK was pressed
         if result:
-            ## we should check there is an active layer
-            layer = self.iface.activeLayer()
             ## get reference points from the layer
+            layer = layers[self.dlg.comboBox.currentIndex()]
             points = {}
             for feature in layer.getFeatures():
-                # target coordinates system should come from layer
+                # TODO target coordinates system should come from layer
                 transf = QgsCoordinateTransform(QgsCoordinateReferenceSystem(4326), QgsCoordinateReferenceSystem(3117))
                 easting_northing = transf.transform(feature.geometry().asPoint())
                 point_id = feature['id']
                 points[point_id] = {'id': point_id, 'coordinates': easting_northing}
 
-            ## the name of the file should come from the dialog box
+            fields = feature.fields()
+
+            ## the name of the file comes from the dialog box
             distances = {}
-            with open('/tmp/distances.csv') as f:
+            with open(self.dlg.lineEdit.text()) as f:
                 for l in f.readlines():
                     l = l.strip()
                     try:
-                        from_id, to_id, distance = l.split(',')
+                        from_id, to_id, distance = l.split(',')[:3]
                         distance = float(distance)
                     except Exception, e:
                         print '»',l,'«',type(e), e
@@ -221,7 +228,6 @@ class DistanceMatrixToCoords:
                     distances[to_id][from_id] = distance
                     points.setdefault(to_id, {'id': to_id, "type": "Point"})
                     points.setdefault(from_id, {'id': from_id, "type": "Point"})
-            print distances
 
             ## inform each point on how many links lead to referenced point
             for n, point in points.items():
@@ -247,23 +253,21 @@ class DistanceMatrixToCoords:
                     if 'heappos' in neighbour:
                         heap.reprioritize(neighbour)
 
-            ## layer name should be from active layer
+            ## TODO do we want to force editing, or only run if layer is being edited?
             layer.startEditing()
 
-            ## source coordinate reference system should be from active layer
+            ## TODO source coordinate reference system should be from active layer
             transf = QgsCoordinateTransform(QgsCoordinateReferenceSystem(3117), QgsCoordinateReferenceSystem(4326))
 
             featureList = []
             ## now add the computed points to the layer
             for p in [p for p in points.values() if p['computed']]:
                 x, y = p['coordinates']
-                feature = QgsFeature()
                 layerPoint = transf.transform(QgsPoint(x, y))
+                feature = QgsFeature()
+                feature.setFields(fields)
                 feature.setGeometry(QgsGeometry.fromPoint(layerPoint))
-                try:
-                    feature['id'] = p['id']
-                except Exception, e:
-                    print type(e), e
+                feature['id'] = p['id']
                 featureList.append(feature)
 
             layer.dataProvider().addFeatures(featureList)
