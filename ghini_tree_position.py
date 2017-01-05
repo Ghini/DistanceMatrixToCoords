@@ -204,37 +204,24 @@ class DistanceMatrixToCoords:
                 point_id = feature['id']
                 points[point_id] = {'id': point_id, 'coordinates': easting_northing}
 
-            ## these values should come from the input files
-            distances = {
-                '14': {'24': 154, '25': 217.788888605},
-                '22': {'23': 154, '13': 217.788888605, '33': 217.788888605},
-                '23': {'33': 154, '24': 154, '14': 217.788888605, '34': 217.788888605},
-                '24': {'34': 154, '25': 154, '15': 217.788888605, '35': 217.788888605},
-                '25': {'35': 154, '15': 154,},
-                '32': {'33': 154, '23': 217.788888605, '43': 217.788888605},
-                '33': {'43': 154, '34': 154, '24': 217.788888605, '44': 217.788888605},
-                '34': {'44': 154, '35': 154, '25': 217.788888605, '45': 217.788888605},
-                '42': {'43': 154, '33': 217.788888605, '53': 217.788888605},
-                '43': {'53': 154, '44': 154, '34': 217.788888605, '54': 217.788888605},
-                '44': {'54': 154, '45': 154, '35': 217.788888605, '53': 217.788888605, '55': 217.788888605},
-                '53': {'55': 308, },
-                '54': {'53': 154, },
-                '55': {'45': 154, '54': 154, '43': 344.354468535, '34': 344.354468535, },
-            }
-
-            ## fill in points from distances
-            for k1, v in distances.items():
-                points.setdefault(k1, {'id': k1, "type": "Point"})
-                for k2 in v:
-                    points.setdefault(k2, {'id': k2, "type": "Point"})
-
-            ## fill-back-links in distances
-            for n1, destinations in distances.items():
-                for n2, distance in destinations.items():
-                    distances.setdefault(n2, {})
-                    if distances[n2].get(n1, distance) != distance:
-                        print 'overwriting %s-%s (%s) with %s' % (n2, n1, distances[n2][n1], distance)
-                    distances[n2][n1] = distance
+            ## the name of the file should come from the dialog box
+            distances = {}
+            with open('/tmp/distances.csv') as f:
+                for l in f.readlines():
+                    l = l.strip()
+                    try:
+                        from_id, to_id, distance = l.split(',')
+                        distance = float(distance)
+                    except Exception, e:
+                        print '»',l,'«',type(e), e
+                        continue
+                    distances.setdefault(from_id, {})
+                    distances.setdefault(to_id, {})
+                    distances[from_id][to_id] = distance
+                    distances[to_id][from_id] = distance
+                    points.setdefault(to_id, {'id': to_id, "type": "Point"})
+                    points.setdefault(from_id, {'id': from_id, "type": "Point"})
+            print distances
 
             ## inform each point on how many links lead to referenced point
             for n, point in points.items():
