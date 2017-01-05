@@ -28,9 +28,9 @@ import resources
 from ghini_tree_position_dialog import DistanceMatrixToCoordsDialog
 import os.path
 
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
-from qgis.core import *
+from qgis.core import (
+    QgsMapLayerRegistry, QgsCoordinateTransform, QgsCoordinateReferenceSystem,
+    QgsFeature, QgsGeometry, QgsPoint)
 
 
 class DistanceMatrixToCoords:
