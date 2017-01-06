@@ -10,7 +10,7 @@
 name=GhiniTreePositioner
 qgisMinimumVersion=2.0
 description=Calculate point positions in 2D given a few reference points and a matrix of mutual horizontal distances
-version=0.1
+version=0.2
 author=Mario Frasca
 email=mario@anche.no
 
