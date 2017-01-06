@@ -292,19 +292,6 @@ class Heap:
 
         highest priority values goes to front of array.
 
-        >>> i = Heap([{'prio':1},{'prio':2},{'prio':3}])
-        >>> i.priorities()
-        [3, 1, 2]
-        >>> i = Heap([{'prio':1},{'prio':2},{'prio':3},{'prio':4},{'prio':5}])
-        >>> i.priorities()
-        [5, 4, 2, 1, 3]
-        >>> i = Heap([{'prio':1},{'prio':3},{'prio':2},{'prio':4},{'prio':5}])
-        >>> i.priorities()
-        [5, 4, 2, 1, 3]
-        >>> i = Heap([{'prio':1},{'prio':2},{'prio':3},{'prio':4},{'prio':5},{'prio':7}])
-        >>> i.priorities()
-        [7, 4, 5, 1, 3, 2]
-
         """
         self.heap = list(elems)
         self.heap[0]['heappos'] = 0
@@ -314,16 +301,6 @@ class Heap:
 
     def push(self, elem):
         """push new element into heap
-
-        >>> i = Heap([{'prio':1},{'prio':2},{'prio':3},{'prio':4},{'prio':5},{'prio':7}])
-        >>> i.push({'prio': 8})
-        >>> i.pop()
-        {'prio': 8}
-        >>> i.push({'prio': 6})
-        >>> i.pop()
-        {'prio': 7}
-        >>> i.pop()
-        {'prio': 6}
 
         """
         k = len(self.heap)
@@ -335,35 +312,6 @@ class Heap:
         """pop highest priority from heap
 
         element with highest priority value is removed from heap.
-
-        >>> i = Heap([{'prio':1},{'prio':2},{'prio':3},{'prio':4},{'prio':5},{'prio':7}])
-        >>> i.pop()
-        {'prio': 7}
-        >>> i.pop()
-        {'prio': 5}
-        >>> i.pop()
-        {'prio': 4}
-        >>> i.pop()
-        {'prio': 3}
-        >>> i.pop()
-        {'prio': 2}
-        >>> i.pop()
-        {'prio': 1}
-        >>> len(i.priorities())
-        0
-
-        >>> a, b, c, d, e, f = ({'prio':1},{'prio':2},{'prio':3},{'prio':4},{'prio':5},{'prio':7})
-        >>> i = Heap([f, e, b, c, d, a])
-        >>> i.priorities()
-        [7, 5, 2, 3, 4, 1]
-        >>> i.pop()
-        {'prio': 7}
-        >>> i.priorities()
-        [5, 4, 2, 3, 1]
-        >>> i.pop()
-        {'prio': 5}
-        >>> i.priorities()
-        [4, 3, 2, 1]
         """
         k = len(self.heap) - 1
         self._swap(0, k)
