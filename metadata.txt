@@ -16,8 +16,8 @@ email=mario@anche.no
 
 about=This plugin solves the problem of estimating accurate positions for trees under a thick canopy, or for locations where high resolution aereal photos are not available. Points need a 'id' property, and the reference system needs be in the same units as the measured mutual distances. Mutual distances are given in the form of a dictionary of dictionaries of numerical values: one numerical value for each edge of which we have the measurement. The outer dictionary is indexed on the 'id' of the first end of the edge, the inner dictionary is indexed on the 'id' of the second end of the edge, the numerical value is the distance of the edge. Points are added to the vector layer containing the initial few reference points.
 
-tracker=github.com/Ghini/treepositioner/issues
-repository=github.com/Ghini/treepositioner
+tracker=http://github.com/Ghini/DistanceMatrixToCoords/issues
+repository=http://github.com/Ghini/DistanceMatrixToCoords/
 # End of mandatory metadata
 
 # Recommended items:
