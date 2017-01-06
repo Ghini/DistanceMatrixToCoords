@@ -237,17 +237,25 @@ class DistanceMatrixToCoords:
                     if 'coordinates' in points[reachable]:
                         point['prio'] += 1
 
+            ## remember last attempted point, to avoid deadlocks
+            last_attempted_point = None
             ## construct priority queue of points for which we still have no coordinates
             heap = Heap([p for p in points.values() if 'coordinates' not in p])
 
             while heap:
                 point = heap.pop()
                 ## compute coordinates of point
-                point['coordinates'] = list(find_point_coordinates(points, distances, point['id']))
+                try:
+                    point['coordinates'] = list(find_point_coordinates(points, distances, point['id']))
+                except ValueError:
+                    point['prio'] = 2
+                    if last_attempted_point != point:
+                        heap.push(point)
+                        last_attempted_point = point 
+                    continue
                 point['computed'] = True
 
                 ## inform points connected to point that they have one more referenced neighbour
-                ## TODO - we should not add points that are aligned with those already connected
                 for neighbour_id, destinations in distances[point['id']].items():
                     neighbour = points[neighbour_id]
                     if 'heappos' in neighbour:
@@ -496,6 +504,8 @@ def find_point_coordinates(points, distances, point_id):
     connected_to = [id for id in sorted(distances[point_id]) if points[id].get('coordinates')]
     connected_matrix = np.array([points[id]['coordinates'] for id in connected_to])
     A = connected_matrix[1:,] - connected_matrix[0,]
+    if almost_parallel(A):
+        raise ValueError('Almost singular matrix')
     A = 1.0 * A  # make sure we work with floating point values
 
     ## squared distances vector, beacon_i to first beacon for which we have distances
@@ -507,3 +517,30 @@ def find_point_coordinates(points, distances, point_id):
     rhs = ((r2[0] - r2[1:]).reshape(D_i1_2.shape) + D_i1_2) / 2.0
     r1, r2, r3, r4 = np.linalg.lstsq(A, rhs.reshape(rhs.shape[:1]))
     return connected_matrix[0,] + r1
+
+
+def normalize(v):
+    """return the unit vector parallel to v
+
+    if given a null vector, return it verbatim.
+    """
+    import numpy as np
+    norm = np.linalg.norm(v)
+    if norm == 0: 
+        return v
+    return v / norm
+
+def almost_parallel(u, v=None, tolerance=0.085):
+    """tell whether two vectors are almost parallel
+
+    Works with two vectors in 2 or 3 dimensions, or on a matrix with 2 rows
+    of 2 or 3 columns.  Based on norm of cross product among unit vectors
+
+    """
+    import numpy as np
+    if v is not None:
+        return np.linalg.norm(np.cross(normalize(u), normalize(v))) < tolerance
+    elif u.shape == (2, 2):
+        return np.linalg.norm(np.cross(normalize(u[0,:]), normalize(u[1,:]))) < tolerance
+    else:
+        return None
