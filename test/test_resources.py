@@ -30,7 +30,7 @@ class DistanceMatrixToCoordsDialogTest(unittest.TestCase):
         pass
 
     def test_icon_png(self):
-        """Test we can click OK."""
+        """Test we can load the icon."""
         path = ':/plugins/DistanceMatrixToCoords/icon.png'
         icon = QIcon(path)
         self.assertFalse(icon.isNull())
