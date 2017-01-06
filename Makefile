@@ -155,6 +155,9 @@ package: compile
 	# git repository).
 	# To use, pass a valid commit or tag as follows:
 	#   make package VERSION=Version_0.3.2
+ifeq (k$(VERSION),k)
+	@echo try again, this time specifying the target VERSION
+else
 	@echo
 	@echo "------------------------------------"
 	@echo "Exporting plugin to zip package.	"
@@ -162,6 +165,7 @@ package: compile
 	rm -f $(PLUGINNAME).zip
 	git archive --prefix=$(PLUGINNAME)/ -o $(PLUGINNAME).zip $(VERSION)
 	echo "Created package: $(PLUGINNAME).zip"
+endif
 
 upload: zip
 	@echo
