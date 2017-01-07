@@ -488,7 +488,7 @@ def almost_parallel(u, v=None, tolerance=0.085):
     import numpy as np
     if v is not None:
         return np.linalg.norm(np.cross(normalize(u), normalize(v))) < tolerance
-    elif u.shape == (2, 2):
+    elif u.shape in [(2, 2), (2,3)]:
         return np.linalg.norm(np.cross(normalize(u[0,:]), normalize(u[1,:]))) < tolerance
     else:
         return None

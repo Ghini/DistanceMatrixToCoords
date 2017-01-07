@@ -96,11 +96,11 @@ test: compile transcompile
 		export QGIS_LOG_FILE=/dev/null; \
 		nosetests -v --with-id --with-coverage --cover-package=. \
 		3>&1 1>&2 2>&3 3>&- || true
-	@echo "----------------------"
-	@echo "If you get a 'no module named qgis.core error, try sourcing"
-	@echo "the helper script we have provided first then run make test."
-	@echo "e.g. source run-env-linux.sh <path to qgis install>; make test"
-	@echo "----------------------"
+	@echo "----------------------"                                        >/dev/null
+	@echo "If you get a 'no module named qgis.core error, try sourcing"   >/dev/null
+	@echo "the helper script we have provided first then run make test."  >/dev/null
+	@echo "e.g. source run-env-linux.sh <path to qgis install>; make test">/dev/null
+	@echo "----------------------"                                        >/dev/null
 
 deploy: compile doc transcompile
 	@echo
