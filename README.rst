@@ -9,4 +9,4 @@ Points already in the layer will be used as reference, Points referred to in the
 
 This plugin is at a very experimental stage. I will be enhancing it as I need that, or as reaction to user feedback.
 
-It would be highly useful if you could provide me with exsample data, for which, I'm quite sure, the plugin does not yet work.
+It would be highly useful if you could provide me with example data, for which, I'm quite sure, the plugin does not yet work.
