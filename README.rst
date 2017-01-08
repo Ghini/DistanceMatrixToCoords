@@ -1,42 +1,12 @@
-<html>
-<body>
-<h3>Plugin Builder Results</h3>
+GhiniTreePositioner
+----------------------
 
-Congratulations! You just built a plugin for QGIS!<br/><br />
+This plugin solves the problem of estimating accurate positions for trees under a thick canopy, or for locations where high resolution aereal photos are not available.
 
-<div id='help' style='font-size:.9em;'>
-Your plugin <b>DistanceMatrixToCoords</b> was created in:<br>
-&nbsp;&nbsp;<b>/home/mario/Local/github/Ghini/treepositioner/DistanceMatrixToCoords</b>
-<p>
-Your QGIS plugin directory is located at:<br>
-&nbsp;&nbsp;<b>/home/mario/.qgis2/python/plugins</b>
-<p>
-<h3>What's Next</h3>
-<ol>
-    <li>In your plugin directory, compile the resources file using pyrcc4 (simply run <b>make</b> if you have automake or use <b>pb_tool</b>)
-    <li>Test the generated sources using <b>make test</b> (or run tests from your IDE)
-    <li>Copy the entire directory containing your new plugin to the QGIS plugin directory (see Notes below)
-    <li>Test the plugin by enabling it in the QGIS plugin manager
-    <li>Customize it by editing the implementation file <b>ghini_tree_position.py</b>
-    <li>Create your own custom icon, replacing the default <b>icon.png</b>
-    <li>Modify your user interface by opening <b>ghini_tree_position_dialog_base.ui</b> in Qt Designer
-</ol>
-Notes:
-<ul>
-    <li>You can use the <b>Makefile</b> to compile and deploy when you
-        make changes. This requires GNU make (gmake). The Makefile is ready to use, however you 
-        will have to edit it to add addional Python source files, dialogs, and translations.
-    <li>You can also use <b>pb_tool</b> to compile and deploy your plugin. Tweak the <i>pb_tool.cfg</i> file included with your plugin as you add files. Install <b>pb_tool</b> using 
-        <i>pip</i> or <i>easy_install</i>. See <a href="http://loc8.cc/pb_tool">http://loc8.cc/pb_tool</a> for more information.
-</ul>
-</div>
-<div style='font-size:.9em;'>
-<p>
-For information on writing PyQGIS code, see <a href="http://loc8.cc/pyqgis_resources">http://loc8.cc/pyqgis_resources</a> for a list of resources.
-</p>
-</div>
-<p>
-&copy;2011-2016 GeoApt LLC - geoapt.com 
-</p>
-</body>
-</html>
+Points need a 'id' property, and the reference system needs be in the same units as the measured mutual distances. Mutual distances are given in the form of a comma separated file, first two columns are the 'id' of to points, third column their distance, in the same measurement unit as the one in the layer.
+
+Points already in the layer will be used as reference, Points referred to in the mutual distances file, but not in the layer, they will be added to the layer, as precisely as possible. 
+
+This plugin is at a very experimental stage. I will be enhancing it as I need that, or as reaction to user feedback.
+
+It would be highly useful if you could provide me with exsample data, for which, I'm quite sure, the plugin does not yet work.
