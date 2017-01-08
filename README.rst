@@ -23,11 +23,22 @@ show me an example
 ---------------------
 
 we are in Colombia, a small area near La Macarena, I have a GeoTiff for the area and we're looking at it, and 5 reference points:
-![Alt text](/doc-resources/pic-case01-01.png?raw=true "Optional Title")
+
+.. image:: doc-resources/pic-case01-01.png
+    :width: 510px
+    :align: center
+    :height: 510px
+    :alt: initial state
 
 the points have an 'id' field and they are called, clockwise, junction, corner, entrance, source-2, and source.
 
 we do not own a GPS machine, or maybe the battery was down, and we observed two trees in the middle of this area, and we could measure, with the approximation of 0.5m, the distances of point A to source-2, source, corner and junction, and of point B to source, junction, and A.
+
+.. image:: doc-resources/pic-case01-02.png
+    :width: 510px
+    :align: center
+    :height: 510px
+    :alt: initial state
 
 we put this information in a csv file, like this::
 
@@ -41,5 +52,16 @@ we put this information in a csv file, like this::
 
 then we invoke the plugin, specifying the name of the layer, and the csv file holding the distances
 
+.. image:: doc-resources/pic-case01-03.png
+    :width: 510px
+    :align: center
+    :height: 510px
+    :alt: initial state
+
 and we get the result in the same layer.
 
+.. image:: doc-resources/pic-case01-05.png
+    :width: 510px
+    :align: center
+    :height: 510px
+    :alt: initial state
