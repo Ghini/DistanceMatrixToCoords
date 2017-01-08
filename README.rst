@@ -22,7 +22,7 @@ It would be highly useful if you could provide me with example data, for which, 
 show me an example
 ---------------------
 
-we are in Colombia, a small area near La Macarena, I have a GeoTiff for the area and we're looking at it, and 5 reference points:
+we are in Colombia, a small area near La Macarena, I have a GeoTiff for the area and we're looking at it, and 4 reference points, they have an 'id' field and they are called, clockwise from bottom left, corner, source-2, source, and junction:
 
 .. image:: doc-resources/pic-case01-01.png
     :width: 510px
@@ -30,9 +30,7 @@ we are in Colombia, a small area near La Macarena, I have a GeoTiff for the area
     :height: 510px
     :alt: initial state
 
-the points have an 'id' field and they are called, clockwise, junction, corner, entrance, source-2, and source.
-
-we do not own a GPS machine, or maybe the battery was down, and we observed two trees in the middle of this area, and we could measure, with the approximation of 0.5m, the distances of point A to source-2, source, corner and junction, and of point B to source, junction, and A.
+we do not own a GPS machine, or maybe the battery was down, and we observed two trees in the middle of this area, and we could measure, with the approximation of 0.5m, the distances of tree A to source-2, source, corner and junction, and of tree B to source, junction, and the other tree.
 
 .. image:: doc-resources/pic-case01-02.png
     :width: 510px
