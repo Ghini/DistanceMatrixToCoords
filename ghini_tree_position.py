@@ -209,8 +209,6 @@ class DistanceMatrixToCoords:
                 point_id = feature['id']
                 points[point_id] = {'id': point_id, 'coordinates': easting_northing}
 
-            fields = feature.fields()
-
             ## the name of the file comes from the dialog box
             distances = {}
             with open(self.dlg.lineEdit.text()) as f:
@@ -231,11 +229,9 @@ class DistanceMatrixToCoords:
 
             ## inform each point on how many links lead to referenced point
             for n, point in points.items():
-                point['prio'] = 0
+                point['prio'] = len(filter(lambda x: 'coordinates' in points[x],
+                                           distances.get(n, {}).keys()))
                 point['computed'] = False
-                for reachable in distances.get(n, {}):
-                    if 'coordinates' in points[reachable]:
-                        point['prio'] += 1
 
             ## remember last attempted point, to avoid deadlocks
             last_attempted_point = None
@@ -262,10 +258,13 @@ class DistanceMatrixToCoords:
                         heap.reprioritize(neighbour)
 
             ## TODO do we want to force editing, or only run if layer is being edited?
+            ## TODO if the layer was already being edited, you don't want to commit changes.
             layer.startEditing()
 
             ## TODO source coordinate reference system should be from active layer
             transf = QgsCoordinateTransform(QgsCoordinateReferenceSystem(3117), QgsCoordinateReferenceSystem(4326))
+
+            fields = layer.fields()
 
             featureList = []
             ## now add the computed points to the layer
@@ -279,6 +278,7 @@ class DistanceMatrixToCoords:
                 featureList.append(feature)
 
             layer.dataProvider().addFeatures(featureList)
+            ## TODO if the layer was already being edited, you don't want to commit changes.
             layer.commitChanges()
 
 
