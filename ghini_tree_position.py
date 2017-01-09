@@ -271,13 +271,17 @@ class DistanceMatrixToCoords:
             for p in [p for p in points.values() if p['computed']]:
                 x, y = p['coordinates']
                 layerPoint = transf.transform(QgsPoint(x, y))
-                feature = QgsFeature()
-                feature.setFields(fields)
+                feature = QgsFeature(fields)
                 feature.setGeometry(QgsGeometry.fromPoint(layerPoint))
                 feature['id'] = p['id']
                 featureList.append(feature)
 
-            layer.dataProvider().addFeatures(featureList)
+            ## bulk-add features to data provider associated to layer
+            (err, ids) = layer.dataProvider().addFeatures(featureList)
+            ## set selection to new features - simplifies removing them in
+            ## case user does not like the results
+            layer.setSelectedFeatures([i.id() for i in ids])
+            ## TODO what if there's any error (this is now stored in `err`)?
             ## TODO if the layer was already being edited, you don't want to commit changes.
             layer.commitChanges()
 
