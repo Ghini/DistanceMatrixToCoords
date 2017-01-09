@@ -28,7 +28,7 @@ repository=http://github.com/Ghini/DistanceMatrixToCoords/
 # Tags are comma separated with spaces allowed
 tags=
 
-homepage=ghini.github.io
+homepage=http://ghini.github.io
 category=Plugins
 icon=icon.png
 # experimental flag
