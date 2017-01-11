@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-"""
-/***************************************************************************
+"""/***************************************************************************
  DistanceMatrixToCoords
  A QGIS plugin
- Calculate point positions in 2D given a few reference points and a matrix of mutual horizontal distances
+ Calculate point positions in 2D given a few reference points and a matrix
+ of mutual horizontal distances
                               -------------------
         begin                : 2017-01-04
         git sha              : $Format:%H$
@@ -19,6 +19,7 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
+
 """
 from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication
 from PyQt4.QtGui import QAction, QIcon, QFileDialog
@@ -92,17 +93,16 @@ class DistanceMatrixToCoords:
         # noinspection PyTypeChecker,PyArgumentList,PyCallByClass
         return QCoreApplication.translate('DistanceMatrixToCoords', message)
 
-    def add_action(
-        self,
-        icon_path,
-        text,
-        callback,
-        enabled_flag=True,
-        add_to_menu=True,
-        add_to_toolbar=True,
-        status_tip=None,
-        whats_this=None,
-        parent=None):
+    def add_action(self,
+                   icon_path,
+                   text,
+                   callback,
+                   enabled_flag=True,
+                   add_to_menu=True,
+                   add_to_toolbar=True,
+                   status_tip=None,
+                   whats_this=None,
+                   parent=None):
         """Add a toolbar icon to the toolbar.
 
         :param icon_path: Path to the icon for this action. Can be a resource
@@ -186,8 +186,9 @@ class DistanceMatrixToCoords:
         del self.toolbar
 
     def select_input_file(self):
-        filename = QFileDialog.getOpenFileName(self.dlg, "Select distances file ","", '*.csv')
-        self.dlg.lineEdit.setText(filename)        
+        filename = QFileDialog.getOpenFileName(
+            self.dlg, "Select distances file ", "", '*.csv')
+        self.dlg.lineEdit.setText(filename)
 
     def run(self):
         """Run method that performs all the real work"""
@@ -202,17 +203,21 @@ class DistanceMatrixToCoords:
         result = self.dlg.exec_()
         # See if OK was pressed
         if result:
-            ## get reference points from the layer
+            # get reference points from the layer
             layer = layers[self.dlg.comboBox.currentIndex()]
             points = {}
             for feature in layer.getFeatures():
                 # TODO target coordinates system should come from layer
-                transf = QgsCoordinateTransform(QgsCoordinateReferenceSystem(4326), QgsCoordinateReferenceSystem(3117))
-                easting_northing = transf.transform(feature.geometry().asPoint())
+                transf = QgsCoordinateTransform(
+                    QgsCoordinateReferenceSystem(4326),
+                    QgsCoordinateReferenceSystem(3117))
+                easting_northing = transf.transform(
+                    feature.geometry().asPoint())
                 point_id = feature['id']
-                points[point_id] = {'id': point_id, 'coordinates': easting_northing}
+                points[point_id] = {'id': point_id,
+                                    'coordinates': easting_northing}
 
-            ## the name of the file comes from the dialog box
+            # the name of the file comes from the dialog box
             distances = {}
             with open(self.dlg.lineEdit.text()) as f:
                 for l in f.readlines():
@@ -221,56 +226,69 @@ class DistanceMatrixToCoords:
                         from_id, to_id, distance = l.split(',')[:3]
                         distance = float(distance)
                     except Exception, e:
-                        print '»',l,'«',type(e), e
+                        print '»', l, '«', type(e), e
                         continue
                     distances.setdefault(from_id, {})
                     distances.setdefault(to_id, {})
                     distances[from_id][to_id] = distance
                     distances[to_id][from_id] = distance
-                    points.setdefault(to_id, {'id': to_id, "type": "Point"})
-                    points.setdefault(from_id, {'id': from_id, "type": "Point"})
+                    points.setdefault(to_id, {'id': to_id,
+                                              "type": "Point"})
+                    points.setdefault(from_id, {'id': from_id,
+                                                "type": "Point"})
 
-            ## inform each point on how many links lead to referenced point
+            # inform each point on how many links lead to referenced point
             for n, point in points.items():
-                point['prio'] = len(filter(lambda x: 'coordinates' in points[x],
-                                           distances.get(n, {}).keys()))
+                point['prio'] = len(
+                    filter(lambda x: 'coordinates' in points[x],
+                           distances.get(n, {}).keys()))
                 point['computed'] = False
 
-            ## remember last attempted point, to avoid deadlocks
+            # remember last attempted point, to avoid deadlocks
             last_attempted_point = None
-            ## construct priority queue of points for which we still have no coordinates
+            # construct priority queue of points for which we still have no
+            # coordinates
             heap = Heap([p for p in points.values() if 'coordinates' not in p])
 
             while heap:
                 point = heap.pop()
-                ## compute coordinates of point
+                # compute coordinates of point
                 try:
-                    point['coordinates'] = list(find_point_coordinates(points, distances, point['id']))
+                    point['coordinates'] = list(
+                        find_point_coordinates(points, distances, point['id']))
                 except ValueError:
                     point['prio'] = 2
                     if last_attempted_point != point:
                         heap.push(point)
-                        last_attempted_point = point 
+                        last_attempted_point = point
                     continue
                 point['computed'] = True
 
-                ## inform points connected to point that they have one more referenced neighbour
-                for neighbour_id, destinations in distances[point['id']].items():
+                # inform points connected to point that they have one more
+                # referenced neighbour
+                for neighbour_id, destinations in distances[
+                        point['id']].items():
                     neighbour = points[neighbour_id]
                     if 'heappos' in neighbour:
                         heap.reprioritize(neighbour)
 
-            ## TODO do we want to force editing, or only run if layer is being edited?
-            ## TODO if the layer was already being edited, you don't want to commit changes.
+            # TODO do we want to force editing, or only run if layer is
+            # being edited?
+
+            # TODO if the layer was already being edited, you don't want to
+            # commit changes.
             layer.startEditing()
 
-            ## TODO source coordinate reference system should be from active layer
-            transf = QgsCoordinateTransform(QgsCoordinateReferenceSystem(3117), QgsCoordinateReferenceSystem(4326))
+            # TODO source coordinate reference system should be from active
+            # layer
+            transf = QgsCoordinateTransform(
+                QgsCoordinateReferenceSystem(3117),
+                QgsCoordinateReferenceSystem(4326))
 
             fields = layer.fields()
 
             featureList = []
-            ## now add the computed points to the layer
+            # now add the computed points to the layer
             for p in [p for p in points.values() if p['computed']]:
                 x, y = p['coordinates']
                 layerPoint = transf.transform(QgsPoint(x, y))
@@ -279,13 +297,14 @@ class DistanceMatrixToCoords:
                 feature['id'] = p['id']
                 featureList.append(feature)
 
-            ## bulk-add features to data provider associated to layer
+            # bulk-add features to data provider associated to layer
             (err, ids) = layer.dataProvider().addFeatures(featureList)
-            ## set selection to new features - simplifies removing them in
-            ## case user does not like the results
+            # set selection to new features - simplifies removing them in
+            # case user does not like the results
             layer.setSelectedFeatures([i.id() for i in ids])
-            ## TODO what if there's any error (this is now stored in `err`)?
-            ## TODO if the layer was already being edited, you don't want to commit changes.
+            # TODO what if there's any error (this is now stored in `err`)?
+            # TODO if the layer was already being edited, you don't want to
+            # commit changes.
             layer.commitChanges()
 
 
@@ -330,56 +349,14 @@ class Heap:
     def reprioritize(self, elem, prio_change=1):
         """change priority of heap element, and let it swim up or sink down
 
-        >>> a, b, c, d, e, f = ({'prio':1},{'prio':2},{'prio':3},{'prio':4},{'prio':5},{'prio':7})
-        >>> i = Heap([a, b, c, d, e, f])
-
         nothing happens if the priority change is zero
-        >>> i.priorities()
-        [7, 4, 5, 1, 3, 2]
-        >>> i.reprioritize(a, 0)
-        >>> i.priorities()
-        [7, 4, 5, 1, 3, 2]
 
         the priority change default value is the positive unit. you specify
         the object of which the priority has to be altered.
-        >>> a, b, c, d, e, f = ({'prio':1},{'prio':2},{'prio':3},{'prio':4},{'prio':5},{'prio':7})
-        >>> i = Heap([a, b, c, d, e, f])
-        >>> i.priorities()
-        [7, 4, 5, 1, 3, 2]
-        >>> i.reprioritize(a)
-        >>> i.priorities()
-        [7, 4, 5, 2, 3, 2]
-        >>> i.reprioritize(a)
-        >>> i.priorities()
-        [7, 4, 5, 3, 3, 2]
-        >>> i.reprioritize(a)
-        >>> i.priorities()
-        [7, 4, 5, 4, 3, 2]
-        >>> i.reprioritize(a)
-        >>> i.priorities()
-        [7, 5, 5, 4, 3, 2]
-        >>> a
-        {'heappos': 1, 'prio': 5}
 
         you can give any value for the desired priority change.
-        >>> a, b, c, d, e, f = ({'prio':1},{'prio':2},{'prio':3},{'prio':4},{'prio':5},{'prio':7})
-        >>> i = Heap([a, b, c, d, e, f])
-        >>> i.priorities()
-        [7, 4, 5, 1, 3, 2]
-        >>> i.reprioritize(c, 8)
-        >>> i.priorities()
-        [11, 7, 5, 1, 4, 2]
-        >>> i.reprioritize(e, 15)
-        >>> i.priorities()
-        [20, 7, 11, 1, 4, 2]
 
         a negative priority change will sink the object into the heap
-        >>> i.reprioritize(e, -20)
-        >>> i.priorities()
-        [11, 7, 2, 1, 4, 0]
-        >>> i.reprioritize(c, -12)
-        >>> i.priorities()
-        [7, 4, 2, 1, -1, 0]
 
         """
         elem['prio'] += prio_change
@@ -395,9 +372,8 @@ class Heap:
         return [e['prio'] for e in self.heap]
 
     def _swap(self, i1, i2):
-        """
-
-        this is an internal private function: direct use will break heap structure.
+        """this is an internal private function: direct use will break heap
+        structure.
 
         >>> i = Heap([{'prio':1},{'prio':2},{'prio':3}])
         >>> i.priorities()
@@ -407,7 +383,7 @@ class Heap:
         [1, 3, 2]
 
         """
-        self.heap[i1], self.heap[i2]= self.heap[i2], self.heap[i1]
+        self.heap[i1], self.heap[i2] = self.heap[i2], self.heap[i1]
         self.heap[i1]['heappos'], self.heap[i2]['heappos'] = (
             self.heap[i2]['heappos'], self.heap[i1]['heappos'])
 
@@ -420,12 +396,14 @@ class Heap:
         while True:
             maxleafindex = (index+1)*2-1
             try:
-                if self.heap[maxleafindex]['prio'] < self.heap[maxleafindex+1]['prio']:
+                if self.heap[maxleafindex]['prio'] < self.heap[
+                        maxleafindex+1]['prio']:
                     maxleafindex += 1
             except IndexError:
                 pass
             try:
-                if self.heap[index]['prio'] < self.heap[maxleafindex]['prio']:
+                if self.heap[index]['prio'] < self.heap[
+                        maxleafindex]['prio']:
                     self._swap(index, maxleafindex)
                     index = maxleafindex
                 else:
@@ -456,22 +434,26 @@ def find_point_coordinates(points, distances, point_id):
     import numpy as np
     from numpy.core.umath_tests import matrix_multiply
 
-    connected_to = [id for id in sorted(distances[point_id]) if points[id].get('coordinates')]
-    connected_matrix = np.array([points[id]['coordinates'] for id in connected_to])
-    A = connected_matrix[1:,] - connected_matrix[0,]
+    connected_to = [id for id in sorted(distances[point_id])
+                    if points[id].get('coordinates')]
+    connected_matrix = np.array([points[id]['coordinates']
+                                 for id in connected_to])
+    A = connected_matrix[1:, ] - connected_matrix[0, ]
     if almost_parallel(A):
         raise ValueError('Almost singular matrix')
     A = 1.0 * A  # make sure we work with floating point values
 
-    ## squared distances vector, beacon_i to first beacon for which we have distances
-    D_i1_2 = matrix_multiply(A*A, [[1],[1]])
-    ## distances of targeted point from used reference points
-    dfb_sel = np.array([distances[point_id][ref_id] for ref_id in connected_to])
+    # squared distances vector, beacon_i to first beacon for which we have
+    # distances
+    D_i1_2 = matrix_multiply(A * A, [[1], [1]])
+    # distances of targeted point from used reference points
+    dfb_sel = np.array([distances[point_id][ref_id]
+                        for ref_id in connected_to])
     r2 = dfb_sel * dfb_sel
 
     rhs = ((r2[0] - r2[1:]).reshape(D_i1_2.shape) + D_i1_2) / 2.0
     r1, r2, r3, r4 = np.linalg.lstsq(A, rhs.reshape(rhs.shape[:1]))
-    return connected_matrix[0,] + r1
+    return connected_matrix[0, ] + r1
 
 
 def normalize(v):
@@ -481,9 +463,10 @@ def normalize(v):
     """
     import numpy as np
     norm = np.linalg.norm(v)
-    if norm == 0: 
+    if norm == 0:
         return v
     return v / norm
+
 
 def almost_parallel(u, v=None, tolerance=0.085):
     """tell whether two vectors are almost parallel
@@ -494,8 +477,10 @@ def almost_parallel(u, v=None, tolerance=0.085):
     """
     import numpy as np
     if v is not None:
-        return np.linalg.norm(np.cross(normalize(u), normalize(v))) < tolerance
-    elif u.shape in [(2, 2), (2,3)]:
-        return np.linalg.norm(np.cross(normalize(u[0,:]), normalize(u[1,:]))) < tolerance
+        cross_vector = np.cross(normalize(u), normalize(v))
+        return np.linalg.norm(cross_vector) < tolerance
+    elif u.shape in [(2, 2), (2, 3)]:
+        cross_vector = np.cross(normalize(u[0, :]), normalize(u[1, :]))
+        return np.linalg.norm(cross_vector) < tolerance
     else:
         return None

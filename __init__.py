@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-"""
-/***************************************************************************
+"""/***************************************************************************
  DistanceMatrixToCoords
                                  A QGIS plugin
- Calculate point positions in 2D given a few reference points and a matrix of mutual horizontal distances
+ Calculate point positions in 2D given a few reference points and a matrix
+ of mutual horizontal distances
                              -------------------
         begin                : 2017-01-04
         copyright            : (C) 2017 by Mario Frasca
@@ -20,6 +20,7 @@
  *                                                                         *
  ***************************************************************************/
  This script initializes the plugin, making it known to QGIS.
+
 """
 
 
