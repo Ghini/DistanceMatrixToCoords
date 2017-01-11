@@ -34,7 +34,7 @@ before_script:
   - export LD_LIBRARY_PATH=${QGIS_PREFIX_PATH}/lib
 
 script:
-  - pep8 --exclude=test ./
+  - pep8 --exclude=test,resources.py,help/source/conf.py ./
   - make pylint
   - QGIS_DEBUG=0 xvfb-run --server-args="-screen 0, 1024x768x24" make test
 
