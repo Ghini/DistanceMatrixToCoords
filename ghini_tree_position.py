@@ -23,7 +23,10 @@
 from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication
 from PyQt4.QtGui import QAction, QIcon, QFileDialog
 # Initialize Qt resources from file resources.py
-import resources
+try:
+    from DistanceMatrixToCoords import resources
+except ImportError:
+    import resources
 # Import the code for the dialog
 from ghini_tree_position_dialog import DistanceMatrixToCoordsDialog
 import os.path
