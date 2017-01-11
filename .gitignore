@@ -9,6 +9,6 @@ help/build
 
 resources.py
 distances-aligned.csv
-af.qm
+i18n/*.qm
 DistanceMatrixToCoords.zip
 i18n/latest_run
