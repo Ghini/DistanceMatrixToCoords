@@ -272,12 +272,11 @@ class DistanceMatrixToCoords:
                     if 'heappos' in neighbour:
                         heap.reprioritize(neighbour)
 
-            # TODO do we want to force editing, or only run if layer is
-            # being edited?
-
-            # TODO if the layer was already being edited, you don't want to
-            # commit changes.
-            layer.startEditing()
+            # remember editable status
+            wasEditable = layer.isEditable()
+            # force editable if not already editable
+            if not wasEditable:
+                layer.startEditing()
 
             # TODO source coordinate reference system should be from active
             # layer
@@ -304,7 +303,8 @@ class DistanceMatrixToCoords:
             layer.setSelectedFeatures([i.id() for i in ids])
 
             # some feedback about the result
-            still_missing = [p for p in points if not p.get('coordinates')]
+            still_missing = [p for p in points.values() if not p.get('coordinates')]
+            # TODO show the user which points we did not compute
             from qgis.gui import QgsMessageBar
             self.iface.messageBar().pushMessage(
                 "Info",
@@ -312,9 +312,9 @@ class DistanceMatrixToCoords:
                     err, len(ids), len(still_missing)),
                 level=QgsMessageBar.INFO)
 
-            # TODO if the layer was already being edited, you don't want to
-            # commit changes.
-            layer.commitChanges()
+            # commit changes only if layer was not editable
+            if not wasEditable:
+                layer.commitChanges()
 
 
 class Heap:
