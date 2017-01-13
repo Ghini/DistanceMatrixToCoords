@@ -303,6 +303,11 @@ class DistanceMatrixToCoords:
             # case user does not like the results
             layer.setSelectedFeatures([i.id() for i in ids])
             # TODO what if there's any error (this is now stored in `err`)?
+            from qgis.gui import QgsMessageBar
+            self.iface.messageBar().pushMessage(
+                "Info",
+                "action result: %s; number of features: %s" % (err, len(ids)),
+                level=QgsMessageBar.INFO)
             # TODO if the layer was already being edited, you don't want to
             # commit changes.
             layer.commitChanges()
