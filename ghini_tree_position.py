@@ -305,7 +305,8 @@ class DistanceMatrixToCoords:
             layer.setSelectedFeatures([i.id() for i in ids])
 
             # some feedback about the result
-            still_missing = [p for p in points.values() if not p.get('coordinates')]
+            still_missing = [p for p in points.values()
+                             if not p.get('coordinates')]
             # TODO show the user which points we did not compute
             from qgis.gui import QgsMessageBar
             self.iface.messageBar().pushMessage(
