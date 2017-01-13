@@ -8,14 +8,13 @@
 
 """
 
-__author__ = 'mario@anche.no'
-__date__ = '2017-01-04'
-__copyright__ = 'Copyright 2017, Mario Frasca'
-
 import unittest
 
 from PyQt4.QtGui import QIcon
 
+__author__ = 'mario@anche.no'
+__date__ = '2017-01-04'
+__copyright__ = 'Copyright 2017, Mario Frasca'
 
 
 class DistanceMatrixToCoordsDialogTest(unittest.TestCase):
@@ -39,6 +38,3 @@ if __name__ == "__main__":
     suite = unittest.makeSuite(DistanceMatrixToCoordsResourcesTest)
     runner = unittest.TextTestRunner(verbosity=2)
     runner.run(suite)
-
-
-

@@ -8,17 +8,15 @@
 
 """
 
+import unittest
+from PyQt4.QtGui import QDialogButtonBox, QDialog
+from ghini_tree_position_dialog import DistanceMatrixToCoordsDialog
+from utilities import get_qgis_app
+
 __author__ = 'mario@anche.no'
 __date__ = '2017-01-04'
 __copyright__ = 'Copyright 2017, Mario Frasca'
 
-import unittest
-
-from PyQt4.QtGui import QDialogButtonBox, QDialog
-
-from ghini_tree_position_dialog import DistanceMatrixToCoordsDialog
-
-from utilities import get_qgis_app
 QGIS_APP = get_qgis_app()
 
 
@@ -52,4 +50,3 @@ if __name__ == "__main__":
     suite = unittest.makeSuite(DistanceMatrixToCoordsDialogTest)
     runner = unittest.TextTestRunner(verbosity=2)
     runner.run(suite)
-

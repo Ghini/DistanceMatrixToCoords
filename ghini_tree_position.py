@@ -394,10 +394,10 @@ class Heap:
 
         """
         while True:
-            maxleafindex = (index+1)*2-1
+            maxleafindex = (index + 1) * 2 - 1
             try:
                 if self.heap[maxleafindex]['prio'] < self.heap[
-                        maxleafindex+1]['prio']:
+                        maxleafindex + 1]['prio']:
                     maxleafindex += 1
             except IndexError:
                 pass

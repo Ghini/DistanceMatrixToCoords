@@ -12,3 +12,5 @@ distances-aligned.csv
 i18n/*.qm
 DistanceMatrixToCoords.zip
 i18n/latest_run
+
+.coverage

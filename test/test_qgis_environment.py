@@ -8,11 +8,6 @@
      (at your option) any later version.
 
 """
-__author__ = 'tim@linfiniti.com'
-__date__ = '20/01/2011'
-__copyright__ = ('Copyright 2012, Australia Indonesia Facility for '
-                 'Disaster Reduction')
-
 import os
 import unittest
 from qgis.core import (
@@ -21,6 +16,12 @@ from qgis.core import (
     QgsRasterLayer)
 
 from utilities import get_qgis_app
+
+__author__ = 'tim@linfiniti.com'
+__date__ = '20/01/2011'
+__copyright__ = ('Copyright 2012, Australia Indonesia Facility for '
+                 'Disaster Reduction')
+
 QGIS_APP = get_qgis_app()
 
 
