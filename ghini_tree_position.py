@@ -192,16 +192,17 @@ class DistanceMatrixToCoords:
 
     def run(self):
         """Run method that performs all the real work"""
+
+        # work only on vector layers (where 0 means points)
         layers = [l for l in self.iface.legendInterface().layers()
-                  if l.type() == l.VectorLayer]
-        layer_list = []
-        for layer in layers:
-            layer_list.append(layer.name())
-        self.dlg.comboBox.addItems(layer_list)
+                  if l.type() == l.VectorLayer and l.geometryType() == 0]
+        self.dlg.comboBox.addItems([l.name() for l in layers])
+
         # show the dialog
         self.dlg.show()
         # Run the dialog event loop
         result = self.dlg.exec_()
+
         # See if OK was pressed
         if result:
             # get reference points from the layer
