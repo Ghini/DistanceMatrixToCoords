@@ -192,7 +192,8 @@ class DistanceMatrixToCoords:
 
     def run(self):
         """Run method that performs all the real work"""
-        layers = self.iface.legendInterface().layers()
+        layers = [l for l in self.iface.legendInterface().layers()
+                  if l.type() == l.VectorLayer]
         layer_list = []
         for layer in layers:
             layer_list.append(layer.name())
