@@ -302,12 +302,16 @@ class DistanceMatrixToCoords:
             # set selection to new features - simplifies removing them in
             # case user does not like the results
             layer.setSelectedFeatures([i.id() for i in ids])
-            # TODO what if there's any error (this is now stored in `err`)?
+
+            # some feedback about the result
+            still_missing = [p for p in points if not p.get('coordinates')]
             from qgis.gui import QgsMessageBar
             self.iface.messageBar().pushMessage(
                 "Info",
-                "action result: %s; number of features: %s" % (err, len(ids)),
+                "success? %s; features added: %s; impossible to add: %s" % (
+                    err, len(ids), len(still_missing)),
                 level=QgsMessageBar.INFO)
+
             # TODO if the layer was already being edited, you don't want to
             # commit changes.
             layer.commitChanges()
