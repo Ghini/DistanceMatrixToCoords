@@ -576,9 +576,34 @@ def rigid_transform_points(points, x, y, theta):
     theta = theta / 180.0 * pi
     R = np.array([[cos(theta), -sin(theta)],
                   [sin(theta), cos(theta)]])
-    for p in points.values():
+    result = {}
+    for k, p in points.items():
+        result[k] = dict(p)
         pt = np.array(p['coordinates'])
         if theta != 0:
             pt = R.dot(pt)
-        p['coordinates'] = tuple(pt + (x, y))
-    return
+        result[k]['coordinates'] = tuple(pt + (x, y))
+    return result
+
+
+def distance_between_homonyms(p, q):
+    """compute sum of square distances
+    """
+    import numpy as np
+    result = 0.0
+    for idp in set(p).union(set(q)):
+        result += ((np.array(p[idp]['coordinates']) -
+                    np.array(q[idp]['coordinates'])) ** 2).sum()
+    return result
+
+
+def compute_minimal_distance_transformation(p, q):
+    """computes the x, y, theta rigid transformation that minimizes the SSD
+    """
+
+    import numpy as np
+    import scipy.optimize
+    def target(x):
+        return distance_between_homonyms(rigid_transform_points(p, *x), q) 
+    optres = scipy.optimize.minimize(target, (0, 0, 0))
+    return optres.x

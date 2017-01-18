@@ -12,6 +12,8 @@ import unittest
 from ghini_tree_position import place_initial_three_points
 from ghini_tree_position import most_connected_point, most_connected_3clique
 from ghini_tree_position import rigid_transform_points
+from ghini_tree_position import distance_between_homonyms
+from ghini_tree_position import compute_minimal_distance_transformation
 from numpy.testing import assert_almost_equal
 
 __author__ = 'mario@anche.no'
@@ -251,7 +253,7 @@ class TestRigidTransformation(unittest.TestCase):
         p = {'p1': {'coordinates': (1.0, 1.0)},
              'p2': {'coordinates': (4.0, 5.0)},
              'p3': {'coordinates': (1.0, 5.0)}, }
-        rigid_transform_points(p, x=0, y=0, theta=0)
+        p = rigid_transform_points(p, x=0, y=0, theta=0)
         self.assertEquals(p['p1']['coordinates'], (1.0, 1.0))
         self.assertEquals(p['p2']['coordinates'], (4.0, 5.0))
         self.assertEquals(p['p3']['coordinates'], (1.0, 5.0))
@@ -260,21 +262,21 @@ class TestRigidTransformation(unittest.TestCase):
         p = {'p1': {'coordinates': (1.0, 1.0)},
              'p2': {'coordinates': (4.0, 5.0)},
              'p3': {'coordinates': (1.0, 5.0)}, }
-        rigid_transform_points(p, x=10, y=0, theta=0)
+        p = rigid_transform_points(p, x=10, y=0, theta=0)
         self.assertEquals(p['p1']['coordinates'], (11.0, 1.0))
         self.assertEquals(p['p2']['coordinates'], (14.0, 5.0))
         self.assertEquals(p['p3']['coordinates'], (11.0, 5.0))
         p = {'p1': {'coordinates': (1.0, 1.0)},
              'p2': {'coordinates': (4.0, 5.0)},
              'p3': {'coordinates': (1.0, 5.0)}, }
-        rigid_transform_points(p, x=0, y=10, theta=0)
+        p = rigid_transform_points(p, x=0, y=10, theta=0)
         self.assertEquals(p['p1']['coordinates'], (1.0, 11.0))
         self.assertEquals(p['p2']['coordinates'], (4.0, 15.0))
         self.assertEquals(p['p3']['coordinates'], (1.0, 15.0))
         p = {'p1': {'coordinates': (1.0, 1.0)},
              'p2': {'coordinates': (4.0, 5.0)},
              'p3': {'coordinates': (1.0, 5.0)}, }
-        rigid_transform_points(p, x=10, y=10, theta=0)
+        p = rigid_transform_points(p, x=10, y=10, theta=0)
         self.assertEquals(p['p1']['coordinates'], (11.0, 11.0))
         self.assertEquals(p['p2']['coordinates'], (14.0, 15.0))
         self.assertEquals(p['p3']['coordinates'], (11.0, 15.0))
@@ -283,7 +285,7 @@ class TestRigidTransformation(unittest.TestCase):
         p = {'p1': {'coordinates': (1.0, 1.0)},
              'p2': {'coordinates': (4.0, 5.0)},
              'p3': {'coordinates': (1.0, 5.0)}, }
-        rigid_transform_points(p, x=0, y=0, theta=90)
+        p = rigid_transform_points(p, x=0, y=0, theta=90)
         assert_almost_equal(p['p1']['coordinates'], (-1.0, 1.0))
         assert_almost_equal(p['p2']['coordinates'], (-5.0, 4.0))
         assert_almost_equal(p['p3']['coordinates'], (-5.0, 1.0))
@@ -292,7 +294,7 @@ class TestRigidTransformation(unittest.TestCase):
         p = {'p1': {'coordinates': (1.0, 1.0)},
              'p2': {'coordinates': (4.0, 5.0)},
              'p3': {'coordinates': (1.0, 5.0)}, }
-        rigid_transform_points(p, x=0, y=0, theta=-90)
+        p = rigid_transform_points(p, x=0, y=0, theta=-90)
         assert_almost_equal(p['p1']['coordinates'], (1.0, -1.0))
         assert_almost_equal(p['p2']['coordinates'], (5.0, -4.0))
         assert_almost_equal(p['p3']['coordinates'], (5.0, -1.0))
@@ -301,7 +303,79 @@ class TestRigidTransformation(unittest.TestCase):
         p = {'p1': {'coordinates': (1.0, 1.0)},
              'p2': {'coordinates': (4.0, 5.0)},
              'p3': {'coordinates': (1.0, 5.0)}, }
-        rigid_transform_points(p, x=10, y=10, theta=90)
+        p = rigid_transform_points(p, x=10, y=10, theta=90)
         assert_almost_equal(p['p1']['coordinates'], (9.0, 11.0))
         assert_almost_equal(p['p2']['coordinates'], (5.0, 14.0))
         assert_almost_equal(p['p3']['coordinates'], (5.0, 11.0))
+
+    def test_rigid_transform_points_leave_input_alone(self):
+        p = {'p1': {'coordinates': (1.0, 1.0)},
+             'p2': {'coordinates': (4.0, 5.0)},
+             'p3': {'coordinates': (1.0, 5.0)}, }
+        q = rigid_transform_points(p, x=10, y=10, theta=90)
+        assert_almost_equal(q['p1']['coordinates'], (9.0, 11.0))
+        assert_almost_equal(q['p2']['coordinates'], (5.0, 14.0))
+        assert_almost_equal(q['p3']['coordinates'], (5.0, 11.0))
+        assert_almost_equal(p['p1']['coordinates'], (1.0, 1.0))
+        assert_almost_equal(p['p2']['coordinates'], (4.0, 5.0))
+        assert_almost_equal(p['p3']['coordinates'], (1.0, 5.0))
+
+
+class TestDistanceBetweenHomonyms(unittest.TestCase):
+
+    def test_distance_between_homonyms_zero(self):
+        p = {'p1': {'coordinates': (1.0, 1.0)},
+             'p2': {'coordinates': (4.0, 5.0)},
+             'p3': {'coordinates': (1.0, 5.0)}, }
+        q = {'p1': {'coordinates': (1.0, 1.0)},
+             'p2': {'coordinates': (4.0, 5.0)},
+             'p3': {'coordinates': (1.0, 5.0)}, }
+        distance = distance_between_homonyms(p, q)
+        assert_almost_equal(distance, 0.0)
+
+    def test_distance_between_homonyms_nonzero(self):
+        p = {'p1': {'coordinates': (1.0, 1.0)},
+             'p2': {'coordinates': (4.0, 5.0)},
+             'p3': {'coordinates': (1.0, 5.0)}, }
+        q = {'p1': {'coordinates': (1.0, 1.0)},
+             'p2': {'coordinates': (4.0, 6.0)},
+             'p3': {'coordinates': (1.0, 5.0)}, }
+        distance = distance_between_homonyms(p, q)
+        assert_almost_equal(distance, 1.0)
+        q = {'p1': {'coordinates': (1.0, 1.0)},
+             'p2': {'coordinates': (4.0, 6.0)},
+             'p3': {'coordinates': (1.0, 4.0)}, }
+        distance = distance_between_homonyms(p, q)
+        assert_almost_equal(distance, 2.0)
+        q = {'p1': {'coordinates': (1.0, 1.0)},
+             'p2': {'coordinates': (4.0, 7.0)},
+             'p3': {'coordinates': (1.0, 5.0)}, }
+        distance = distance_between_homonyms(p, q)
+        assert_almost_equal(distance, 4.0)
+
+
+class TestMinimalDistanceTransformation(unittest.TestCase):
+
+    def test_compute_minimal_distance_transformation_null(self):
+        p = {'p1': {'coordinates': (1.0, 1.0)},
+             'p2': {'coordinates': (4.0, 5.0)},
+             'p3': {'coordinates': (1.0, 5.0)}, }
+        q = {'p1': {'coordinates': (1.0, 1.0)},
+             'p2': {'coordinates': (4.0, 5.0)},
+             'p3': {'coordinates': (1.0, 5.0)}, }
+        x, y, theta = compute_minimal_distance_transformation(p, q)
+        assert_almost_equal((x, y, theta), (0.0, 0.0, 0.0))
+
+    def test_compute_minimal_distance_transformation_null(self):
+        p = {'p1': {'coordinates': (1.0, 1.0)},
+             'p2': {'coordinates': (4.0, 5.0)},
+             'p4': {'coordinates': (0.0, 5.0)},
+             'p5': {'coordinates': (4.0, 4.0)},
+             'p3': {'coordinates': (1.0, 5.0)}, }
+        q = {'p1': {'coordinates': (9.0, 11.0)},
+             'p2': {'coordinates': (5.0, 14.0)},
+             'p4': {'coordinates': (5.0, 10.0)},
+             'p5': {'coordinates': (6.0, 14.0)},
+             'p3': {'coordinates': (5.0, 11.0)}, }
+        x, y, theta = compute_minimal_distance_transformation(p, q)
+        assert_almost_equal((x, y, theta), (10.0, 10.0, 90.0), decimal=6)
