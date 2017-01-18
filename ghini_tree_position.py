@@ -565,3 +565,20 @@ def place_initial_three_points(points, distances, gps):
         v13 = R.dot([Cx, -Cy])
     # now rotate as of v12
     points[P3]['coordinates'] = tuple(v13 + gps[P1]['coordinates'])
+
+
+def rigid_transform_points(points, x, y, theta):
+    """transform 'coordinates' of points by displacement and rotation
+
+    """
+    import numpy as np
+    from math import cos, sin, pi
+    theta = theta / 180.0 * pi
+    R = np.array([[cos(theta), -sin(theta)],
+                  [sin(theta), cos(theta)]])
+    for p in points.values():
+        pt = np.array(p['coordinates'])
+        if theta != 0:
+            pt = R.dot(pt)
+        p['coordinates'] = tuple(pt + (x, y))
+    return

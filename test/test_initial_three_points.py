@@ -1,5 +1,5 @@
 # coding=utf-8
-"""Dialog test.
+"""
 
 .. note:: This program is free software; you can redistribute it and/or modify
      it under the terms of the GNU General Public License as published by
@@ -11,6 +11,8 @@
 import unittest
 from ghini_tree_position import place_initial_three_points
 from ghini_tree_position import most_connected_point, most_connected_3clique
+from ghini_tree_position import rigid_transform_points
+from numpy.testing import assert_almost_equal
 
 __author__ = 'mario@anche.no'
 __date__ = '2017-01-18'
@@ -85,9 +87,7 @@ class TestInitialTriangle(unittest.TestCase):
                      'p3': {'p1': 4.0, 'p2': 3.0}, }
         place_initial_three_points(points, distances, proj_gps)
         self.assertEquals(points['p2']['coordinates'], (5.0, 0.0))
-        expect = "%0.7f,%0.7f" % (3.2, 2.4)
-        result = "%0.7f,%0.7f" % points['p3']['coordinates']
-        self.assertEquals(result, expect)
+        assert_almost_equal(points['p3']['coordinates'], (3.2, 2.4))
 
     def test_345_left(self):
         points = {
@@ -102,9 +102,7 @@ class TestInitialTriangle(unittest.TestCase):
                      'p3': {'p1': 4.0, 'p2': 3.0}, }
         place_initial_three_points(points, distances, proj_gps)
         self.assertEquals(points['p2']['coordinates'], (5.0, 0.0))
-        expect = "%0.7f,%0.7f" % (3.2, -2.4)
-        result = "%0.7f,%0.7f" % points['p3']['coordinates']
-        self.assertEquals(result, expect)
+        assert_almost_equal(points['p3']['coordinates'], (3.2, -2.4))
 
     def test_435_right(self):
         points = {
@@ -119,9 +117,7 @@ class TestInitialTriangle(unittest.TestCase):
                      'p3': {'p1': 3.0, 'p2': 4.0}, }
         place_initial_three_points(points, distances, proj_gps)
         self.assertEquals(points['p2']['coordinates'], (5.0, 0.0))
-        expect = "%0.7f,%0.7f" % (1.8, 2.4)
-        result = "%0.7f,%0.7f" % points['p3']['coordinates']
-        self.assertEquals(result, expect)
+        assert_almost_equal(points['p3']['coordinates'], (1.8, 2.4))
 
     def test_51213_right(self):
         points = {
@@ -136,9 +132,7 @@ class TestInitialTriangle(unittest.TestCase):
                      'p3': {'p1': 12.0, 'p2': 13.0}, }
         place_initial_three_points(points, distances, proj_gps)
         self.assertEquals(points['p2']['coordinates'], (5.0, 0.0))
-        expect = "%0.7f,%0.7f" % (0, 12)
-        result = "%0.7f,%0.7f" % points['p3']['coordinates']
-        self.assertEquals(result, expect)
+        assert_almost_equal(points['p3']['coordinates'], (0, 12))
 
     def test_51213_left(self):
         points = {
@@ -153,9 +147,7 @@ class TestInitialTriangle(unittest.TestCase):
                      'p3': {'p1': 12.0, 'p2': 13.0}, }
         place_initial_three_points(points, distances, proj_gps)
         self.assertEquals(points['p2']['coordinates'], (5.0, 0.0))
-        expect = "%0.7f,%0.7f" % (0, -12)
-        result = "%0.7f,%0.7f" % points['p3']['coordinates']
-        self.assertEquals(result, expect)
+        assert_almost_equal(points['p3']['coordinates'], (0, -12))
 
     def test_566_90_right(self):
         points = {
@@ -170,9 +162,7 @@ class TestInitialTriangle(unittest.TestCase):
                      'p3': {'p1': 5.0, 'p2': 5.0}, }
         place_initial_three_points(points, distances, proj_gps)
         self.assertEquals(points['p2']['coordinates'], (0.0, 6.0))
-        expect = "%0.7f,%0.7f" % (-4, 3)
-        result = "%0.7f,%0.7f" % points['p3']['coordinates']
-        self.assertEquals(result, expect)
+        assert_almost_equal(points['p3']['coordinates'], (-4, 3))
 
     def test_566_90_left(self):
         points = {
@@ -186,10 +176,9 @@ class TestInitialTriangle(unittest.TestCase):
                      'p2': {'p1': 6.0, 'p3': 5.0},
                      'p3': {'p1': 5.0, 'p2': 5.0}, }
         place_initial_three_points(points, distances, proj_gps)
+        self.assertEquals(points['p1']['coordinates'], (0.0, 0.0))
         self.assertEquals(points['p2']['coordinates'], (0.0, 6.0))
-        expect = "%0.7f,%0.7f" % (4, 3)
-        result = "%0.7f,%0.7f" % points['p3']['coordinates']
-        self.assertEquals(result, expect)
+        assert_almost_equal(points['p3']['coordinates'], (4, 3))
 
     def test_345_translated(self):
         points = {
@@ -205,9 +194,7 @@ class TestInitialTriangle(unittest.TestCase):
         place_initial_three_points(points, distances, proj_gps)
         self.assertEquals(points['p1']['coordinates'], (1.0, 1.0))
         self.assertEquals(points['p2']['coordinates'], (6.0, 1.0))
-        expect = "%0.7f,%0.7f" % (4.2, 3.4)
-        result = "%0.7f,%0.7f" % points['p3']['coordinates']
-        self.assertEquals(result, expect)
+        assert_almost_equal(points['p3']['coordinates'], (4.2, 3.4))
 
     def test_345_translated_opposite(self):
         points = {
@@ -223,9 +210,7 @@ class TestInitialTriangle(unittest.TestCase):
         place_initial_three_points(points, distances, proj_gps)
         self.assertEquals(points['p1']['coordinates'], (1.0, 1.0))
         self.assertEquals(points['p2']['coordinates'], (6.0, 1.0))
-        expect = "%0.7f,%0.7f" % (4.2, 3.4)
-        result = "%0.7f,%0.7f" % points['p3']['coordinates']
-        self.assertEquals(result, expect)
+        assert_almost_equal(points['p3']['coordinates'], (4.2, -1.4))
 
     def test_345_rototranslated(self):
         points = {
@@ -241,9 +226,7 @@ class TestInitialTriangle(unittest.TestCase):
         place_initial_three_points(points, distances, proj_gps)
         self.assertEquals(points['p1']['coordinates'], (1.0, 1.0))
         self.assertEquals(points['p2']['coordinates'], (4.0, 5.0))
-        expect = "%0.7f,%0.7f" % (4, 1)
-        result = "%0.7f,%0.7f" % points['p3']['coordinates']
-        self.assertEquals(result, expect)
+        assert_almost_equal(points['p3']['coordinates'], (4, 1))
 
     def test_345_rototranslated_opposite(self):
         points = {
@@ -259,24 +242,66 @@ class TestInitialTriangle(unittest.TestCase):
         place_initial_three_points(points, distances, proj_gps)
         self.assertEquals(points['p1']['coordinates'], (1.0, 1.0))
         self.assertEquals(points['p2']['coordinates'], (4.0, 5.0))
-        expect = "%0.7f,%0.7f" % (1, 5)
-        result = "%0.7f,%0.7f" % points['p3']['coordinates']
-        self.assertEquals(result, expect)
+        assert_almost_equal(points['p3']['coordinates'], (1, 5))
 
-    def test_345_translated_opposite(self):
-        points = {
-            'p1': {'id': 'p1'},
-            'p2': {'id': 'p2'},
-            'p3': {'id': 'p3'}}
-        proj_gps = {'p1': {'coordinates': (1.0, 1.0)},
-                    'p2': {'coordinates': (11.0, 1.0)},
-                    'p3': {'coordinates': (7.0, 0.0)}, }
-        distances = {'p1': {'p2': 5.0, 'p3': 4.0},
-                     'p2': {'p1': 5.0, 'p3': 3.0},
-                     'p3': {'p1': 4.0, 'p2': 3.0}, }
-        place_initial_three_points(points, distances, proj_gps)
-        self.assertEquals(points['p1']['coordinates'], (1.0, 1.0))
-        self.assertEquals(points['p2']['coordinates'], (6.0, 1.0))
-        expect = "%0.7f,%0.7f" % (4.2, -1.4)
-        result = "%0.7f,%0.7f" % points['p3']['coordinates']
-        self.assertEquals(result, expect)
+
+class TestRigidTransformation(unittest.TestCase):
+
+    def test_rigid_transform_points_no_movement(self):
+        p = {'p1': {'coordinates': (1.0, 1.0)},
+             'p2': {'coordinates': (4.0, 5.0)},
+             'p3': {'coordinates': (1.0, 5.0)}, }
+        rigid_transform_points(p, x=0, y=0, theta=0)
+        self.assertEquals(p['p1']['coordinates'], (1.0, 1.0))
+        self.assertEquals(p['p2']['coordinates'], (4.0, 5.0))
+        self.assertEquals(p['p3']['coordinates'], (1.0, 5.0))
+
+    def test_rigid_transform_points_only_translate(self):
+        p = {'p1': {'coordinates': (1.0, 1.0)},
+             'p2': {'coordinates': (4.0, 5.0)},
+             'p3': {'coordinates': (1.0, 5.0)}, }
+        rigid_transform_points(p, x=10, y=0, theta=0)
+        self.assertEquals(p['p1']['coordinates'], (11.0, 1.0))
+        self.assertEquals(p['p2']['coordinates'], (14.0, 5.0))
+        self.assertEquals(p['p3']['coordinates'], (11.0, 5.0))
+        p = {'p1': {'coordinates': (1.0, 1.0)},
+             'p2': {'coordinates': (4.0, 5.0)},
+             'p3': {'coordinates': (1.0, 5.0)}, }
+        rigid_transform_points(p, x=0, y=10, theta=0)
+        self.assertEquals(p['p1']['coordinates'], (1.0, 11.0))
+        self.assertEquals(p['p2']['coordinates'], (4.0, 15.0))
+        self.assertEquals(p['p3']['coordinates'], (1.0, 15.0))
+        p = {'p1': {'coordinates': (1.0, 1.0)},
+             'p2': {'coordinates': (4.0, 5.0)},
+             'p3': {'coordinates': (1.0, 5.0)}, }
+        rigid_transform_points(p, x=10, y=10, theta=0)
+        self.assertEquals(p['p1']['coordinates'], (11.0, 11.0))
+        self.assertEquals(p['p2']['coordinates'], (14.0, 15.0))
+        self.assertEquals(p['p3']['coordinates'], (11.0, 15.0))
+        
+    def test_rigid_transform_points_rotate_90(self):
+        p = {'p1': {'coordinates': (1.0, 1.0)},
+             'p2': {'coordinates': (4.0, 5.0)},
+             'p3': {'coordinates': (1.0, 5.0)}, }
+        rigid_transform_points(p, x=0, y=0, theta=90)
+        assert_almost_equal(p['p1']['coordinates'], (-1.0, 1.0))
+        assert_almost_equal(p['p2']['coordinates'], (-5.0, 4.0))
+        assert_almost_equal(p['p3']['coordinates'], (-5.0, 1.0))
+        
+    def test_rigid_transform_points_rotate_m90(self):
+        p = {'p1': {'coordinates': (1.0, 1.0)},
+             'p2': {'coordinates': (4.0, 5.0)},
+             'p3': {'coordinates': (1.0, 5.0)}, }
+        rigid_transform_points(p, x=0, y=0, theta=-90)
+        assert_almost_equal(p['p1']['coordinates'], (1.0, -1.0))
+        assert_almost_equal(p['p2']['coordinates'], (5.0, -4.0))
+        assert_almost_equal(p['p3']['coordinates'], (5.0, -1.0))
+
+    def test_rigid_transform_points_move_rotate(self):
+        p = {'p1': {'coordinates': (1.0, 1.0)},
+             'p2': {'coordinates': (4.0, 5.0)},
+             'p3': {'coordinates': (1.0, 5.0)}, }
+        rigid_transform_points(p, x=10, y=10, theta=90)
+        assert_almost_equal(p['p1']['coordinates'], (9.0, 11.0))
+        assert_almost_equal(p['p2']['coordinates'], (5.0, 14.0))
+        assert_almost_equal(p['p3']['coordinates'], (5.0, 11.0))
