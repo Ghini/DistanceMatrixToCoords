@@ -496,3 +496,70 @@ def almost_parallel(u, v=None, tolerance=0.085):
         return np.linalg.norm(cross_vector) < tolerance
     else:
         return None
+
+
+def most_connected_point(distances):
+    """choose the point with most connections
+    """
+
+    count, key = max([(len(distances[k]), k) for k in distances])
+    return key
+
+
+def most_connected_3clique(distances, guess=None):
+    """find the 3clique from which to reach the largest set of points
+
+    this is not really implemented, we need an initial guess for this to
+    work. given that, we just perform a complete search.
+
+    """
+    if guess is None:
+        guess = most_connected_point(distances)
+    cliques = reduce(lambda x, y: x.union(y),
+                     [set((guess, n, i) for i in distances[n].keys()
+                          if i in distances[guess] and i > n)
+                      for n in distances[guess]])
+    reachable_from_clique = {}
+    for a, b, c in cliques:
+        reachable_from_clique[(a, b, c)] = set()
+        for k in a, b, c:
+            for n in distances[k]:
+                reachable_from_clique[(a, b, c)].add(n)
+    dummy, result, = max((len(v), k) for k, v in reachable_from_clique.items())
+    return tuple(sorted(result))
+
+
+def place_initial_three_points(points, distances, gps):
+    """compute coordinates of three points, compatible with the data
+
+    points (dict)
+    distances (dict) defines mutual distances between pairs of points.
+    positions (dict) is the measured gps positions, affected by errors.
+
+    """
+    P1, P2, P3 = most_connected_3clique(distances)
+    points[P1]['coordinates'] = gps[P1]['coordinates']
+    points[P2]['coordinates'] = (distances[P1][P2], 0.0)
+    d12 = distances[P1][P2]
+    sqd12 = distances[P1][P2] * distances[P1][P2]
+    sqd13 = distances[P1][P3] * distances[P1][P3]
+    sqd23 = distances[P2][P3] * distances[P2][P3]
+    Cx = (sqd12 + sqd13 - sqd23) / 2 / d12
+    from math import sqrt
+    Cy = sqrt(sqd13 - Cx * Cx)
+    points[P3]['coordinates'] = (Cx, Cy)
+    #
+    # now crudely decide about handedness
+    import numpy as np
+    u12 = np.array(gps[P2]['coordinates']) - np.array(
+        gps[P1]['coordinates'])
+    u13 = np.array(gps[P3]['coordinates']) - np.array(
+        gps[P1]['coordinates'])
+    cross_vector_gps = normalize(np.cross(normalize(u12), normalize(u13)))
+    u12 = np.array(points[P2]['coordinates']) - np.array(
+        points[P1]['coordinates'])
+    u13 = np.array(points[P3]['coordinates']) - np.array(
+        points[P1]['coordinates'])
+    cross_vector = normalize(np.cross(normalize(u12), normalize(u13)))
+    if cross_vector != cross_vector_gps:
+        points[P3]['coordinates'] = (Cx, -Cy)
