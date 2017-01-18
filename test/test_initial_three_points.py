@@ -69,6 +69,7 @@ class TestMostConnectedPoint(unittest.TestCase):
         self.assertEquals(most_connected_3clique(self.from_to_d), expect)
         self.assertEquals(most_connected_3clique(self.from_to_d), expect)
 
+
 class TestInitialTriangle(unittest.TestCase):
     def test_345_right(self):
         points = {
