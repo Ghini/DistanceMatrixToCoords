@@ -104,3 +104,54 @@ class TestInitialTriangle(unittest.TestCase):
         expect = "%0.7f,%0.7f" % (3.2, -2.4)
         result = "%0.7f,%0.7f" % points['p3']['coordinates']
         self.assertEquals(result, expect)
+
+    def test_435_right(self):
+        points = {
+            'p1': {'id': 'p1'},
+            'p2': {'id': 'p2'},
+            'p3': {'id': 'p3'}}
+        proj_gps = {'p1': {'coordinates': (0.0, 0.0)},
+                    'p2': {'coordinates': (7.0, 0.0)},
+                    'p3': {'coordinates': (0.0, 7.0)}, }
+        distances = {'p1': {'p2': 5.0, 'p3': 3.0},
+                     'p2': {'p1': 5.0, 'p3': 4.0},
+                     'p3': {'p1': 3.0, 'p2': 4.0}, }
+        place_initial_three_points(points, distances, proj_gps)
+        self.assertEquals(points['p2']['coordinates'], (5.0, 0.0))
+        expect = "%0.7f,%0.7f" % (1.8, 2.4)
+        result = "%0.7f,%0.7f" % points['p3']['coordinates']
+        self.assertEquals(result, expect)
+
+    def test_51213_right(self):
+        points = {
+            'p1': {'id': 'p1'},
+            'p2': {'id': 'p2'},
+            'p3': {'id': 'p3'}}
+        proj_gps = {'p1': {'coordinates': (0.0, 0.0)},
+                    'p2': {'coordinates': (7.0, 0.0)},
+                    'p3': {'coordinates': (0.0, 7.0)}, }
+        distances = {'p1': {'p2': 5.0, 'p3': 12.0},
+                     'p2': {'p1': 5.0, 'p3': 13.0},
+                     'p3': {'p1': 12.0, 'p2': 13.0}, }
+        place_initial_three_points(points, distances, proj_gps)
+        self.assertEquals(points['p2']['coordinates'], (5.0, 0.0))
+        expect = "%0.7f,%0.7f" % (0, 12)
+        result = "%0.7f,%0.7f" % points['p3']['coordinates']
+        self.assertEquals(result, expect)
+
+    def test_51213_left(self):
+        points = {
+            'p1': {'id': 'p1'},
+            'p2': {'id': 'p2'},
+            'p3': {'id': 'p3'}}
+        proj_gps = {'p1': {'coordinates': (0.0, 0.0)},
+                    'p2': {'coordinates': (7.0, 0.0)},
+                    'p3': {'coordinates': (0.0, -7.0)}, }
+        distances = {'p1': {'p2': 5.0, 'p3': 12.0},
+                     'p2': {'p1': 5.0, 'p3': 13.0},
+                     'p3': {'p1': 12.0, 'p2': 13.0}, }
+        place_initial_three_points(points, distances, proj_gps)
+        self.assertEquals(points['p2']['coordinates'], (5.0, 0.0))
+        expect = "%0.7f,%0.7f" % (0, -12)
+        result = "%0.7f,%0.7f" % points['p3']['coordinates']
+        self.assertEquals(result, expect)
