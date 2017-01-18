@@ -601,9 +601,10 @@ def compute_minimal_distance_transformation(p, q):
     """computes the x, y, theta rigid transformation that minimizes the SSD
     """
 
+    def target(x):
+        return distance_between_homonyms(rigid_transform_points(p, *x), q)
+
     import numpy as np
     import scipy.optimize
-    def target(x):
-        return distance_between_homonyms(rigid_transform_points(p, *x), q) 
     optres = scipy.optimize.minimize(target, (0, 0, 0))
     return optres.x
