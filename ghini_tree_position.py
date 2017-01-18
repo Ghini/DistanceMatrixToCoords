@@ -539,27 +539,29 @@ def place_initial_three_points(points, distances, gps):
     """
     P1, P2, P3 = most_connected_3clique(distances)
     points[P1]['coordinates'] = gps[P1]['coordinates']
-    points[P2]['coordinates'] = (distances[P1][P2], 0.0)
+    # keep direction P1-P2 according to gps, but respect distance
+    import numpy as np
+    # unit vector P1->P2
+    u12 = normalize(np.array(gps[P2]['coordinates']) -
+                    np.array(gps[P1]['coordinates']))
+    # rotation matrix: x-axis to P1->P2
+    R = np.array([[u12[0], -u12[1]], [u12[1], u12[0]]])
     d12 = distances[P1][P2]
+    points[P2]['coordinates'] = tuple(d12 * u12 + gps[P1]['coordinates'])
     sqd12 = distances[P1][P2] * distances[P1][P2]
     sqd13 = distances[P1][P3] * distances[P1][P3]
     sqd23 = distances[P2][P3] * distances[P2][P3]
     Cx = (sqd12 + sqd13 - sqd23) / 2 / d12
     from math import sqrt
     Cy = sqrt(sqd13 - Cx * Cx)
-    points[P3]['coordinates'] = (Cx, Cy)
     #
     # now crudely decide about handedness
-    import numpy as np
-    u12 = np.array(gps[P2]['coordinates']) - np.array(
-        gps[P1]['coordinates'])
-    u13 = np.array(gps[P3]['coordinates']) - np.array(
-        gps[P1]['coordinates'])
-    cross_vector_gps = normalize(np.cross(normalize(u12), normalize(u13)))
-    u12 = np.array(points[P2]['coordinates']) - np.array(
-        points[P1]['coordinates'])
-    u13 = np.array(points[P3]['coordinates']) - np.array(
-        points[P1]['coordinates'])
-    cross_vector = normalize(np.cross(normalize(u12), normalize(u13)))
-    if cross_vector != cross_vector_gps:
-        points[P3]['coordinates'] = (Cx, -Cy)
+    u13 = normalize(np.array(gps[P3]['coordinates']) -
+                    np.array(gps[P1]['coordinates']))
+    cross_vector_gps = np.cross(u12, u13)
+    if cross_vector_gps > 0:
+        v13 = R.dot([Cx, Cy])
+    else:
+        v13 = R.dot([Cx, -Cy])
+    # now rotate as of v12
+    points[P3]['coordinates'] = tuple(v13 + gps[P1]['coordinates'])

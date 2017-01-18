@@ -71,6 +71,7 @@ class TestMostConnectedPoint(unittest.TestCase):
 
 
 class TestInitialTriangle(unittest.TestCase):
+
     def test_345_right(self):
         points = {
             'p1': {'id': 'p1'},
@@ -153,5 +154,129 @@ class TestInitialTriangle(unittest.TestCase):
         place_initial_three_points(points, distances, proj_gps)
         self.assertEquals(points['p2']['coordinates'], (5.0, 0.0))
         expect = "%0.7f,%0.7f" % (0, -12)
+        result = "%0.7f,%0.7f" % points['p3']['coordinates']
+        self.assertEquals(result, expect)
+
+    def test_566_90_right(self):
+        points = {
+            'p1': {'id': 'p1'},
+            'p2': {'id': 'p2'},
+            'p3': {'id': 'p3'}}
+        proj_gps = {'p1': {'coordinates': (0.0, 0.0)},
+                    'p2': {'coordinates': (0.0, 7.0)},
+                    'p3': {'coordinates': (-7.0, 0.0)}, }
+        distances = {'p1': {'p2': 6.0, 'p3': 5.0},
+                     'p2': {'p1': 6.0, 'p3': 5.0},
+                     'p3': {'p1': 5.0, 'p2': 5.0}, }
+        place_initial_three_points(points, distances, proj_gps)
+        self.assertEquals(points['p2']['coordinates'], (0.0, 6.0))
+        expect = "%0.7f,%0.7f" % (-4, 3)
+        result = "%0.7f,%0.7f" % points['p3']['coordinates']
+        self.assertEquals(result, expect)
+
+    def test_566_90_left(self):
+        points = {
+            'p1': {'id': 'p1'},
+            'p2': {'id': 'p2'},
+            'p3': {'id': 'p3'}}
+        proj_gps = {'p1': {'coordinates': (0.0, 0.0)},
+                    'p2': {'coordinates': (0.0, 7.0)},
+                    'p3': {'coordinates': (7.0, 0.0)}, }
+        distances = {'p1': {'p2': 6.0, 'p3': 5.0},
+                     'p2': {'p1': 6.0, 'p3': 5.0},
+                     'p3': {'p1': 5.0, 'p2': 5.0}, }
+        place_initial_three_points(points, distances, proj_gps)
+        self.assertEquals(points['p2']['coordinates'], (0.0, 6.0))
+        expect = "%0.7f,%0.7f" % (4, 3)
+        result = "%0.7f,%0.7f" % points['p3']['coordinates']
+        self.assertEquals(result, expect)
+
+    def test_345_translated(self):
+        points = {
+            'p1': {'id': 'p1'},
+            'p2': {'id': 'p2'},
+            'p3': {'id': 'p3'}}
+        proj_gps = {'p1': {'coordinates': (1.0, 1.0)},
+                    'p2': {'coordinates': (11.0, 1.0)},
+                    'p3': {'coordinates': (0.0, 7.0)}, }
+        distances = {'p1': {'p2': 5.0, 'p3': 4.0},
+                     'p2': {'p1': 5.0, 'p3': 3.0},
+                     'p3': {'p1': 4.0, 'p2': 3.0}, }
+        place_initial_three_points(points, distances, proj_gps)
+        self.assertEquals(points['p1']['coordinates'], (1.0, 1.0))
+        self.assertEquals(points['p2']['coordinates'], (6.0, 1.0))
+        expect = "%0.7f,%0.7f" % (4.2, 3.4)
+        result = "%0.7f,%0.7f" % points['p3']['coordinates']
+        self.assertEquals(result, expect)
+
+    def test_345_translated_opposite(self):
+        points = {
+            'p1': {'id': 'p1'},
+            'p2': {'id': 'p2'},
+            'p3': {'id': 'p3'}}
+        proj_gps = {'p1': {'coordinates': (1.0, 1.0)},
+                    'p2': {'coordinates': (11.0, 1.0)},
+                    'p3': {'coordinates': (7.0, 0.0)}, }
+        distances = {'p1': {'p2': 5.0, 'p3': 4.0},
+                     'p2': {'p1': 5.0, 'p3': 3.0},
+                     'p3': {'p1': 4.0, 'p2': 3.0}, }
+        place_initial_three_points(points, distances, proj_gps)
+        self.assertEquals(points['p1']['coordinates'], (1.0, 1.0))
+        self.assertEquals(points['p2']['coordinates'], (6.0, 1.0))
+        expect = "%0.7f,%0.7f" % (4.2, 3.4)
+        result = "%0.7f,%0.7f" % points['p3']['coordinates']
+        self.assertEquals(result, expect)
+
+    def test_345_rototranslated(self):
+        points = {
+            'p1': {'id': 'p1'},
+            'p2': {'id': 'p2'},
+            'p3': {'id': 'p3'}}
+        proj_gps = {'p1': {'coordinates': (1.0, 1.0)},
+                    'p2': {'coordinates': (7.0, 9.0)},
+                    'p3': {'coordinates': (7.0, 0.0)}, }
+        distances = {'p1': {'p2': 5.0, 'p3': 3.0},
+                     'p2': {'p1': 5.0, 'p3': 4.0},
+                     'p3': {'p1': 3.0, 'p2': 4.0}, }
+        place_initial_three_points(points, distances, proj_gps)
+        self.assertEquals(points['p1']['coordinates'], (1.0, 1.0))
+        self.assertEquals(points['p2']['coordinates'], (4.0, 5.0))
+        expect = "%0.7f,%0.7f" % (4, 1)
+        result = "%0.7f,%0.7f" % points['p3']['coordinates']
+        self.assertEquals(result, expect)
+
+    def test_345_rototranslated_opposite(self):
+        points = {
+            'p1': {'id': 'p1'},
+            'p2': {'id': 'p2'},
+            'p3': {'id': 'p3'}}
+        proj_gps = {'p1': {'coordinates': (1.0, 1.0)},
+                    'p2': {'coordinates': (7.0, 9.0)},
+                    'p3': {'coordinates': (0.0, 7.0)}, }
+        distances = {'p1': {'p2': 5.0, 'p3': 4.0},
+                     'p2': {'p1': 5.0, 'p3': 3.0},
+                     'p3': {'p1': 4.0, 'p2': 3.0}, }
+        place_initial_three_points(points, distances, proj_gps)
+        self.assertEquals(points['p1']['coordinates'], (1.0, 1.0))
+        self.assertEquals(points['p2']['coordinates'], (4.0, 5.0))
+        expect = "%0.7f,%0.7f" % (1, 5)
+        result = "%0.7f,%0.7f" % points['p3']['coordinates']
+        self.assertEquals(result, expect)
+
+    def test_345_translated_opposite(self):
+        points = {
+            'p1': {'id': 'p1'},
+            'p2': {'id': 'p2'},
+            'p3': {'id': 'p3'}}
+        proj_gps = {'p1': {'coordinates': (1.0, 1.0)},
+                    'p2': {'coordinates': (11.0, 1.0)},
+                    'p3': {'coordinates': (7.0, 0.0)}, }
+        distances = {'p1': {'p2': 5.0, 'p3': 4.0},
+                     'p2': {'p1': 5.0, 'p3': 3.0},
+                     'p3': {'p1': 4.0, 'p2': 3.0}, }
+        place_initial_three_points(points, distances, proj_gps)
+        self.assertEquals(points['p1']['coordinates'], (1.0, 1.0))
+        self.assertEquals(points['p2']['coordinates'], (6.0, 1.0))
+        expect = "%0.7f,%0.7f" % (4.2, -1.4)
         result = "%0.7f,%0.7f" % points['p3']['coordinates']
         self.assertEquals(result, expect)
