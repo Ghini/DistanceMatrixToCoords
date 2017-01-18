@@ -278,7 +278,7 @@ class TestRigidTransformation(unittest.TestCase):
         self.assertEquals(p['p1']['coordinates'], (11.0, 11.0))
         self.assertEquals(p['p2']['coordinates'], (14.0, 15.0))
         self.assertEquals(p['p3']['coordinates'], (11.0, 15.0))
-        
+
     def test_rigid_transform_points_rotate_90(self):
         p = {'p1': {'coordinates': (1.0, 1.0)},
              'p2': {'coordinates': (4.0, 5.0)},
@@ -287,7 +287,7 @@ class TestRigidTransformation(unittest.TestCase):
         assert_almost_equal(p['p1']['coordinates'], (-1.0, 1.0))
         assert_almost_equal(p['p2']['coordinates'], (-5.0, 4.0))
         assert_almost_equal(p['p3']['coordinates'], (-5.0, 1.0))
-        
+
     def test_rigid_transform_points_rotate_m90(self):
         p = {'p1': {'coordinates': (1.0, 1.0)},
              'p2': {'coordinates': (4.0, 5.0)},
