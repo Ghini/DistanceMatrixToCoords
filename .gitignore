@@ -14,3 +14,5 @@ DistanceMatrixToCoords.zip
 i18n/latest_run
 
 .coverage
+test/gisquestion224812.py
+qgis-auth.db
