@@ -207,72 +207,32 @@ class DistanceMatrixToCoords:
         if result:
             # get reference points from the layer
             layer = layers[self.dlg.comboBox.currentIndex()]
+
+            # use position of first feature in layer to select local utm
+            f1 = layer.getFeatures().next()
+
+            local_utm = QgsCoordinateReferenceSystem()
+            local_utm.createFromProj4(utm_zone_proj4(f1.geometry().asPoint()))
+            transf = QgsCoordinateTransform(layer.crs(), local_utm)
+            back_transf = QgsCoordinateTransform(local_utm, layer.crs())
+
+            # populate 'points' dict with projected coordinates
             points = {}
             for feature in layer.getFeatures():
-                # TODO target coordinates system should come from layer
-                transf = QgsCoordinateTransform(
-                    QgsCoordinateReferenceSystem(4326),
-                    QgsCoordinateReferenceSystem(3117))
+                # we work with local utm projection
                 easting_northing = transf.transform(
                     feature.geometry().asPoint())
                 point_id = feature['id']
                 points[point_id] = {'id': point_id,
                                     'coordinates': easting_northing}
 
-            # the name of the file comes from the dialog box
-            distances = {}
+            # get distances from csv file, and compute connectivity to
+            # referenced points
             with open(self.dlg.lineEdit.text()) as f:
-                for l in f.readlines():
-                    l = l.strip()
-                    try:
-                        from_id, to_id, distance = l.split(',')[:3]
-                        distance = float(distance)
-                    except Exception, e:
-                        print '»', l, '«', type(e), e
-                        continue
-                    distances.setdefault(from_id, {})
-                    distances.setdefault(to_id, {})
-                    distances[from_id][to_id] = distance
-                    distances[to_id][from_id] = distance
-                    points.setdefault(to_id, {'id': to_id,
-                                              "type": "Point"})
-                    points.setdefault(from_id, {'id': from_id,
-                                                "type": "Point"})
+                distances = get_distances_from_csv(f, points)
 
-            # inform each point on how many links lead to referenced point
-            for n, point in points.items():
-                point['prio'] = len(
-                    filter(lambda x: 'coordinates' in points[x],
-                           distances.get(n, {}).keys()))
-                point['computed'] = False
-
-            # remember last attempted point, to avoid deadlocks
-            last_attempted_point = None
-            # construct priority queue of points for which we still have no
-            # coordinates
-            heap = Heap([p for p in points.values() if 'coordinates' not in p])
-
-            while heap:
-                point = heap.pop()
-                # compute coordinates of point
-                try:
-                    point['coordinates'] = list(
-                        find_point_coordinates(points, distances, point['id']))
-                except ValueError:
-                    point['prio'] = 2
-                    if last_attempted_point != point:
-                        heap.push(point)
-                        last_attempted_point = point
-                    continue
-                point['computed'] = True
-
-                # inform points connected to point that they have one more
-                # referenced neighbour
-                for neighbour_id, destinations in distances[
-                        point['id']].items():
-                    neighbour = points[neighbour_id]
-                    if 'heappos' in neighbour:
-                        heap.reprioritize(neighbour)
+            # compute missing coordinates
+            extrapolate_coordinates(points, distances)
 
             # remember editable status
             wasEditable = layer.isEditable()
@@ -280,19 +240,13 @@ class DistanceMatrixToCoords:
             if not wasEditable:
                 layer.startEditing()
 
-            # TODO source coordinate reference system should be from active
-            # layer
-            transf = QgsCoordinateTransform(
-                QgsCoordinateReferenceSystem(3117),
-                QgsCoordinateReferenceSystem(4326))
-
             fields = layer.fields()
 
             featureList = []
             # now add the computed points to the layer
             for p in [p for p in points.values() if p['computed']]:
                 x, y = p['coordinates']
-                layerPoint = transf.transform(QgsPoint(x, y))
+                layerPoint = back_transf.transform(QgsPoint(x, y))
                 feature = QgsFeature(fields)
                 feature.setGeometry(QgsGeometry.fromPoint(layerPoint))
                 feature['id'] = p['id']
@@ -318,6 +272,68 @@ class DistanceMatrixToCoords:
             # commit changes only if layer was not editable
             if not wasEditable:
                 layer.commitChanges()
+
+
+def extrapolate_coordinates(points, distances):
+    """compute missing coordinates respecting distances and given points
+
+    navigate distances graph, keep selecting most connected point, to
+    compute its coordinates given enough distances from enough referenced
+    points.
+
+    """
+    # remember last attempted point, to avoid deadlocks
+    last_attempted_point = None
+    # construct priority queue of points for which we still have no
+    # coordinates
+    heap = Heap([p for p in points.values() if 'coordinates' not in p])
+
+    while heap:
+        point = heap.pop()
+        # compute coordinates of point
+        try:
+            point['coordinates'] = list(
+                find_point_coordinates(points, distances, point['id']))
+        except ValueError:
+            point['prio'] = 2
+            if last_attempted_point != point:
+                heap.push(point)
+                last_attempted_point = point
+            continue
+        point['computed'] = True
+
+        # inform points connected to point that they have one more
+        # referenced neighbour
+        for neighbour_id, destinations in distances[point['id']].items():
+            neighbour = points[neighbour_id]
+            if 'heappos' in neighbour:
+                heap.reprioritize(neighbour)
+
+
+def get_distances_from_csv(stream, points):
+    distances = {}
+    for l in stream.readlines():
+        l = l.strip()
+        try:
+            from_id, to_id, distance = l.split(',')[:3]
+            distance = float(distance)
+        except Exception, e:
+            print '»', l, '«', type(e), e
+            continue
+        distances.setdefault(from_id, {})
+        distances.setdefault(to_id, {})
+        distances[from_id][to_id] = distance
+        distances[to_id][from_id] = distance
+        points.setdefault(to_id, {'id': to_id,
+                                  "type": "Point"})
+        points.setdefault(from_id, {'id': from_id,
+                                    "type": "Point"})
+    # inform each point on how many links lead to referenced point
+    for n, point in points.items():
+        point['prio'] = len(filter(lambda x: 'coordinates' in points[x],
+                                   distances.get(n, {}).keys()))
+        point['computed'] = False
+    return distances
 
 
 class Heap:
@@ -608,3 +624,18 @@ def compute_minimal_distance_transformation(p, q):
     import scipy.optimize
     optres = scipy.optimize.minimize(target, (0, 0, 0))
     return optres.x
+
+
+def utm_zone_proj4(pt):
+    import math
+    lon, lat = pt
+    wkt = '+proj=utm +ellps=WGS84 +datum=WGS84 +units=m +no_defs'
+    zone_number = int(math.floor((lon + 180) % 360 / 6) + 1)
+    wkt += " +zone=%s" % zone_number
+    if lat < 0:
+        wkt += ' +south'
+    return wkt
+
+
+def solve_puzzle(points, distances, gps):
+    place_initial_three_points(points, distances, gps)
