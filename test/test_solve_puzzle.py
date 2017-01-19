@@ -126,6 +126,10 @@ class TestExtrapolateCoordinates(unittest.TestCase):
                      'z,y,3\nz,C,5\nz,D,4\n'
                      't,x,2.5\nt,B,2.5\nt,y,2.5\n')
         d = get_distances_from_csv(s, points)
+        self.assertFalse('coordinates' in points['x'])
+        self.assertFalse('coordinates' in points['y'])
+        self.assertFalse('coordinates' in points['z'])
+        self.assertFalse('coordinates' in points['t'])
         extrapolate_coordinates(points, d)
         self.assertEquals(tuple(points['x']['coordinates']), (4.0, 3.0))
         self.assertEquals(tuple(points['y']['coordinates']), (4.0, 6.0))
