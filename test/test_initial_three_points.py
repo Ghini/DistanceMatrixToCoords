@@ -70,8 +70,21 @@ class TestMostConnectedPoint(unittest.TestCase):
     def test_best_clique_from_most_connected_point(self):
         expect = ('10', '13', '22')
         self.assertEquals(most_connected_3clique(self.from_to_d), expect)
-        self.assertEquals(most_connected_3clique(self.from_to_d), expect)
-        self.assertEquals(most_connected_3clique(self.from_to_d), expect)
+
+    def test_best_clique_completely_connects_to_most_points(self):
+        from_to = [("04", "10"), ("04", "18"), ("04", "19"), ("04", "20"), ("04", "02"),
+                   ("10", "18"), ("10", "19"), ("10", "20"), ("10", "02"), ("10", "21"),
+                   ("18", "19"), ("18", "20"), ("18", "02"), ("18", "12"),
+                   ("12", "14"), ("12", "21"), ("12", "03"), ("12", "16"),
+                   ("16", "21"), ("16", "03"), ]
+        expect = ('04', '10', '18')
+        from_to_d = {}
+        for k, n in from_to:
+            from_to_d.setdefault(k, {})
+            from_to_d.setdefault(n, {})
+            from_to_d[k][n] = 0
+            from_to_d[n][k] = 0
+        self.assertEquals(most_connected_3clique(from_to_d), expect)
 
 
 class TestInitialTriangle(unittest.TestCase):

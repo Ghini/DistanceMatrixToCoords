@@ -537,11 +537,10 @@ def most_connected_3clique(distances, guess=None):
                       for n in distances[guess]])
     reachable_from_clique = {}
     for a, b, c in cliques:
-        reachable_from_clique[(a, b, c)] = set()
-        for k in a, b, c:
-            for n in distances[k]:
-                reachable_from_clique[(a, b, c)].add(n)
+        reachable_from_clique[(a, b, c)] = set(
+            distances[a]).intersection(distances[b]).intersection(distances[c])
     dummy, result, = max((len(v), k) for k, v in reachable_from_clique.items())
+    print dummy
     return tuple(sorted(result))
 
 
