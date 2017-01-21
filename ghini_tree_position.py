@@ -581,6 +581,13 @@ def place_initial_three_points(points, distances, gps):
         v13 = R.dot([Cx, -Cy])
     # now rotate as of v12
     points[P3]['coordinates'] = tuple(v13 + gps[P1]['coordinates'])
+    #
+    # and compute connectivity to these three points for all others
+    for p in points.values():
+        p.setdefault('prio', 0)
+    for p in [P1, P2, P3]:
+        for q in distances[p]:
+            points[q]['prio'] += 1
 
 
 def rigid_transform_points(points, x, y, theta):
@@ -590,15 +597,13 @@ def rigid_transform_points(points, x, y, theta):
     import numpy as np
     from math import cos, sin, pi
     theta = theta / 180.0 * pi
-    R = np.array([[cos(theta), -sin(theta)],
-                  [sin(theta), cos(theta)]])
+    R = np.array([[cos(theta), -sin(theta), x],
+                  [sin(theta), cos(theta), y]])
     result = {}
     for k, p in points.items():
         result[k] = dict(p)
-        pt = np.array(p['coordinates'])
-        if theta != 0:
-            pt = R.dot(pt)
-        result[k]['coordinates'] = tuple(pt + (x, y))
+        pt = np.array(tuple(p['coordinates'][:2]) + (1, ))
+        result[k]['coordinates'] = tuple(R.dot(pt))
     return result
 
 
@@ -615,6 +620,10 @@ def distance_between_homonyms(p, q):
 
 def compute_minimal_distance_transformation(p, q):
     """computes the x, y, theta rigid transformation that minimizes the SSD
+
+    the rigid transformation applied to the frame 'p' that approximates it
+    to the points 'q'
+
     """
 
     def target(x):
@@ -622,7 +631,7 @@ def compute_minimal_distance_transformation(p, q):
 
     import numpy as np
     import scipy.optimize
-    optres = scipy.optimize.minimize(target, (0, 0, 0))
+    optres = scipy.optimize.minimize(target, (0, 0, 0), method='Powell')
     return optres.x
 
 

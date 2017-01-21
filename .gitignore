@@ -16,3 +16,4 @@ i18n/latest_run
 .coverage
 test/gisquestion224812.py
 qgis-auth.db
+test/gisquestion224812-2.py

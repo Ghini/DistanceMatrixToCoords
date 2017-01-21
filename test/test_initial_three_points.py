@@ -290,6 +290,15 @@ class TestRigidTransformation(unittest.TestCase):
         assert_almost_equal(p['p2']['coordinates'], (-5.0, 4.0))
         assert_almost_equal(p['p3']['coordinates'], (-5.0, 1.0))
 
+    def test_rigid_transform_points_rotate_45(self):
+        p = {'p1': {'coordinates': (1.0, 0.0)},
+             'p2': {'coordinates': (0.0, 1.0)},
+             'p3': {'coordinates': (1.0, 1.0)}, }
+        p = rigid_transform_points(p, x=0, y=0, theta=45)
+        assert_almost_equal(p['p1']['coordinates'], (.70710678, .707106780))
+        assert_almost_equal(p['p2']['coordinates'], (-.70710678, .70710678))
+        assert_almost_equal(p['p3']['coordinates'], (0, 1.41421356))
+
     def test_rigid_transform_points_rotate_m90(self):
         p = {'p1': {'coordinates': (1.0, 1.0)},
              'p2': {'coordinates': (4.0, 5.0)},

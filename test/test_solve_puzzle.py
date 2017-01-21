@@ -5,6 +5,9 @@ from numpy.testing import assert_almost_equal
 from ghini_tree_position import solve_puzzle, get_distances_from_csv
 from ghini_tree_position import utm_zone_proj4
 from ghini_tree_position import extrapolate_coordinates
+from ghini_tree_position import compute_minimal_distance_transformation
+from ghini_tree_position import place_initial_three_points
+from ghini_tree_position import rigid_transform_points
 
 
 class TestUTMChoice(unittest.TestCase):
@@ -137,27 +140,83 @@ class TestExtrapolateCoordinates(unittest.TestCase):
         assert_almost_equal(tuple(points['t']['coordinates']), (2.0, 4.5))
 
 
+class TestComputeMinimalDistanceTransformation(unittest.TestCase):
+
+    def test_compute_minimal_distance_transformation_2_points(self):
+        p = {'A': {'coordinates': (0, 0)},
+             'B': {'coordinates': (2, 0)}}
+        q = {'A': {'coordinates': (0, 0)},
+             'B': {'coordinates': (4, 0)}}
+        t = compute_minimal_distance_transformation(p, q)
+        assert_almost_equal(t, (1, 0, 0), decimal=6)
+
+    def test_compute_minimal_distance_transformation_345(self):
+        p = {'A': {'coordinates': (0, 0)},
+             'B': {'coordinates': (4, 0)},
+             'C': {'coordinates': (0, 3)},
+             'D': {'coordinates': (4, 3)}}
+        q = {'A': {'coordinates': (0, 0)},
+             'B': {'coordinates': (8, 0)},
+             'C': {'coordinates': (0, 6)},
+             'D': {'coordinates': (8, 6)}}
+        t = compute_minimal_distance_transformation(p, q)
+        assert_almost_equal(t, (2, 1.5, 0), decimal=6)
+
+    def test_compute_minimal_distance_transformation_4_points(self):
+        p = {'A': {'coordinates': (2, 0)},
+             'B': {'coordinates': (1, 0)},
+             'C': {'coordinates': (0, 1)},
+             'D': {'coordinates': (0, 2)}}
+        q = {'A': {'coordinates': (0, 2)},
+             'B': {'coordinates': (0, 1)},
+             'C': {'coordinates': (-1, 0)},
+             'D': {'coordinates': (-2, 0)}}
+        t = compute_minimal_distance_transformation(p, q)
+        assert_almost_equal(t[:2], (0, 0), decimal=6)
+        assert_almost_equal(t[2] / 90, 1.0, decimal=5)
+
+    def test_compute_minimal_distance_transformation_4_points2(self):
+        p = {'A': {'coordinates': (2, 0)},
+             'B': {'coordinates': (1, 0)},
+             'C': {'coordinates': (0, 1)},
+             'D': {'coordinates': (0, 2)}}
+        q = {'A': {'coordinates': (0, 2.1)},
+             'B': {'coordinates': (0, 0.9)},
+             'C': {'coordinates': (-0.9, 0)},
+             'D': {'coordinates': (-2.1, 0)}}
+        t = compute_minimal_distance_transformation(p, q)
+        assert_almost_equal(t[:2], (0, 0), decimal=6)
+        assert_almost_equal(t[2] / 90, 1.0, decimal=5)
+
+
 class TestSolvePuzzle(unittest.TestCase):
 
     def test_solve_puzzle(self):
         points = {
-            'p1': {'id': 'p1'},
-            'p2': {'id': 'p2'},
-            'p3': {'id': 'p3'},
-            'p4': {'id': 'p4'}}
-        proj_gps = {'p1': {'coordinates': (0.0, 0.0)},
-                    'p2': {'coordinates': (4.0, 0.0)},
-                    'p3': {'coordinates': (4.0, 3.0)},
-                    'p4': {'coordinates': (0.0, 3.0)}, }
-        distances_list = [('p1', 'p2', 4.0),
-                          ('p1', 'p3', 5.0),
-                          ('p1', 'p4', 3.0),
-                          ('p2', 'p3', 3.0),
-                          ('p2', 'p4', 5.0),
-                          ('p1', 'p4', 4.0)]
+            'A': {'id': 'A'},
+            'B': {'id': 'B'},
+            'C': {'id': 'C'},
+            'D': {'id': 'D'}}
+        proj_gps = {'A': {'coordinates': (0.0, 0.0)},
+                    'B': {'coordinates': (8.0, 0.0)},
+                    'C': {'coordinates': (8.0, 6.0)},
+                    'D': {'coordinates': (0.0, 6.0)}, }
+        distances_list = [('A', 'B', 4.0),
+                          ('A', 'C', 5.0),
+                          ('A', 'D', 3.0),
+                          ('B', 'C', 3.0),
+                          ('B', 'D', 5.0),
+                          ('C', 'D', 4.0)]
         distances = {}
         for p, q, d in distances_list:
             distances.setdefault(p, {})
             distances.setdefault(q, {})
             distances[p][q] = distances[q][p] = d
-        solution = solve_puzzle(points, distances, proj_gps)
+        place_initial_three_points(points, distances, proj_gps)
+        extrapolate_coordinates(points, distances)
+        t = compute_minimal_distance_transformation(points, proj_gps)
+        p = rigid_transform_points(points, *t)
+        assert_almost_equal(p['A']['coordinates'], (2, 1.5), decimal=6)
+        assert_almost_equal(p['B']['coordinates'], (6, 1.5), decimal=6)
+        assert_almost_equal(p['C']['coordinates'], (6, 4.5), decimal=6)
+        assert_almost_equal(p['D']['coordinates'], (2, 4.5), decimal=6)
