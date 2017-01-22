@@ -42,7 +42,7 @@ class TestEnumerate3Cliques(unittest.TestCase):
 
     def test_enumerate_3cliques_two(self):
         from_to = [('1', '2'), ('2', '3'), ('3', '1'),
-                   ('4', '2'), ('3', '4') ]
+                   ('4', '2'), ('3', '4')]
         ftd = compute_from_to_dictionary(from_to)
         expect = [('1', '2', '3'), ('2', '3', '4')]
         self.assertEquals(list(enumerate_3cliques(ftd)), expect)
@@ -65,7 +65,8 @@ class TestMostConnectedPoint(unittest.TestCase):
         self.assertEquals(most_connected_3clique(ftd), expect)
 
     def test_other_best_clique(self):
-        self.from_to.extend([("03", "15"), ('02', '16'), ('02', '03'), ('21', '18')])
+        self.from_to.extend([("03", "15"), ('02', '16'), ('02', '03'),
+                             ('21', '18')])
         ftd = compute_from_to_dictionary(self.from_to)
         expect = ('02', '12', '21')
         self.assertEquals(most_connected_3clique(ftd), expect)
