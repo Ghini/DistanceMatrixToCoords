@@ -514,14 +514,6 @@ def almost_parallel(u, v=None, tolerance=0.085):
         return None
 
 
-def most_connected_point(distances):
-    """choose the point with most connections
-    """
-
-    count, key = max([(len(distances[k]), k) for k in distances])
-    return key
-
-
 def most_connected_3clique(distances):
     """find the 3clique from which to reach the largest set of points
 

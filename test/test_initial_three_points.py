@@ -11,7 +11,7 @@
 import unittest
 from numpy.testing import assert_almost_equal
 from ghini_tree_position import place_initial_three_points
-from ghini_tree_position import most_connected_point, most_connected_3clique
+from ghini_tree_position import most_connected_3clique
 from ghini_tree_position import rigid_transform_points
 from ghini_tree_position import distance_between_homonyms
 from ghini_tree_position import compute_minimal_distance_transformation
@@ -50,8 +50,6 @@ class TestEnumerate3Cliques(unittest.TestCase):
 
 class TestMostConnectedPoint(unittest.TestCase):
     def setUp(self):
-        """bad example, it's from DistanceMatrixToCoords/issues/5
-        """
         self.from_to = [("18", "02"), ("14", "02"), ("14", "21"), ("14", "12"),
                         ("12", "02"), ("12", "21"), ("12", "03"), ("12", "16"),
                         ("16", "21"), ("16", "03"), ("16", "15"), ("16", "07"),
