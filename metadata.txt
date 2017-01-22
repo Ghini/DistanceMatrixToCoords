@@ -30,7 +30,7 @@ tags=
 
 homepage=http://ghini.github.io
 category=Plugins
-icon=icon.png
+icon=ghini-24.png
 # experimental flag
 experimental=True
 

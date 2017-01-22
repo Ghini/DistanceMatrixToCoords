@@ -49,11 +49,12 @@ PLUGINNAME = DistanceMatrixToCoords
 
 PY_FILES = \
 	__init__.py \
-	ghini_tree_position.py ghini_tree_position_dialog.py
+	ghini_tree_position_dialog.py \
+	ghini_tree_position.py
 
-UI_FILES = ghini_tree_position_dialog_base.ui
+UI_FILES = ghini_tree_position_dialog_base.ui ghini_correct_GPS_dialog_base.ui
 
-EXTRAS = metadata.txt icon.png
+EXTRAS = metadata.txt pointsfromdistances.png gpsadjust.png ghini-24.png
 
 EXTRA_DIRS =
 

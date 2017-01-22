@@ -30,6 +30,7 @@ except ImportError:
     import resources
 # Import the code for the dialog
 from ghini_tree_position_dialog import DistanceMatrixToCoordsDialog
+from ghini_tree_position_dialog import GpsAndDistancesToAdjustedGpsDialog
 import os.path
 
 from qgis.core import (
@@ -69,6 +70,7 @@ class DistanceMatrixToCoords:
 
         # Create the dialog (after translation) and keep reference
         self.dlg = DistanceMatrixToCoordsDialog()
+        self.dlg2 = GpsAndDistancesToAdjustedGpsDialog()
         # Declare instance attributes
         self.actions = []
         self.menu = self.tr(u'&GhiniTreePositioner')
@@ -168,11 +170,17 @@ class DistanceMatrixToCoords:
     def initGui(self):
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
 
-        icon_path = ':/plugins/DistanceMatrixToCoords/icon.png'
+        icon_path = ':/plugins/DistanceMatrixToCoords/pointsfromdistances.png'
         self.add_action(
             icon_path,
             text=self.tr(u'add points from distances'),
-            callback=self.run,
+            callback=self.pointsfromdistances_run,
+            parent=self.iface.mainWindow())
+        icon_path = ':/plugins/DistanceMatrixToCoords/gpsadjust.png'
+        self.add_action(
+            icon_path,
+            text=self.tr(u'adjust GPS points using distances'),
+            callback=self.gpsadjust_run,
             parent=self.iface.mainWindow())
 
     def unload(self):
@@ -190,7 +198,13 @@ class DistanceMatrixToCoords:
             self.dlg, "Select distances file ", "", '*.csv')
         self.dlg.lineEdit.setText(filename)
 
-    def run(self):
+    def gpsadjust_run(self):
+        # show the dialog
+        self.dlg2.show()
+        # Run the dialog event loop
+        result = self.dlg2.exec_()
+
+    def pointsfromdistances_run(self):
         """Run method that performs all the real work"""
 
         # work only on vector layers (where 0 means points)
@@ -606,7 +620,7 @@ def rigid_transform_points(points, x, y, theta):
     result = {}
     for k, p in points.items():
         result[k] = dict(p)
-        pt = np.array(tuple(p['coordinates'][:2]) + (1, ))
+        pt = np.array(tuple(p['coordinates'])[:2] + (1, ))
         result[k]['coordinates'] = tuple(R.dot(pt))
     return result
 
@@ -650,5 +664,8 @@ def utm_zone_proj4(pt):
     return wkt
 
 
-def solve_puzzle(points, distances, gps):
-    place_initial_three_points(points, distances, gps)
+def solve_puzzle(points, distances, proj_gps):
+    place_initial_three_points(points, distances, proj_gps)
+    extrapolate_coordinates(points, distances)
+    t = compute_minimal_distance_transformation(points, proj_gps)
+    return rigid_transform_points(points, *t)
