@@ -522,26 +522,39 @@ def most_connected_point(distances):
     return key
 
 
-def most_connected_3clique(distances, guess=None):
+def most_connected_3clique(distances):
     """find the 3clique from which to reach the largest set of points
 
     this is not really implemented, we need an initial guess for this to
     work. given that, we just perform a complete search.
 
     """
-    if guess is None:
-        guess = most_connected_point(distances)
-    cliques = reduce(lambda x, y: x.union(y),
-                     [set((guess, n, i) for i in distances[n].keys()
-                          if i in distances[guess] and i > n)
-                      for n in distances[guess]])
+    cliques = enumerate_3cliques(distances)
     reachable_from_clique = {}
     for a, b, c in cliques:
         reachable_from_clique[(a, b, c)] = set(
             distances[a]).intersection(distances[b]).intersection(distances[c])
     dummy, result, = max((len(v), k) for k, v in reachable_from_clique.items())
-    print dummy
     return tuple(sorted(result))
+
+
+def enumerate_3cliques(distances):
+    """enumerate cliques with 3 elements
+    """
+
+    nodes = set(distances.keys())
+    nodes = reduce(lambda x, y: x.union(y.keys()), distances.values(), nodes)
+    nodes = sorted(nodes)
+    while nodes:
+        a = nodes.pop(0)
+        inner = list(nodes)
+        while inner:
+            b = inner.pop(0)
+            if b not in distances[a]:
+                continue
+            for c in set(inner).intersection(
+                    distances[a]).intersection(distances[b]):
+                yield (a, b, c)
 
 
 def place_initial_three_points(points, distances, gps):

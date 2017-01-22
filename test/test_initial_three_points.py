@@ -9,82 +9,76 @@
 """
 
 import unittest
+from numpy.testing import assert_almost_equal
 from ghini_tree_position import place_initial_three_points
 from ghini_tree_position import most_connected_point, most_connected_3clique
 from ghini_tree_position import rigid_transform_points
 from ghini_tree_position import distance_between_homonyms
 from ghini_tree_position import compute_minimal_distance_transformation
-from numpy.testing import assert_almost_equal
+from ghini_tree_position import enumerate_3cliques
 
 __author__ = 'mario@anche.no'
 __date__ = '2017-01-18'
 __copyright__ = 'Copyright 2017, Mario Frasca'
 
 
+def compute_from_to_dictionary(from_to):
+    ftd = {}
+    for k, n in from_to:
+        ftd.setdefault(k, {})
+        ftd.setdefault(n, {})
+        ftd[k][n] = 0
+        ftd[n][k] = 0
+    return ftd
+
+
+class TestEnumerate3Cliques(unittest.TestCase):
+
+    def test_enumerate_3cliques_easy(self):
+        from_to = [('1', '2'), ('2', '3'), ('3', '1')]
+        ftd = compute_from_to_dictionary(from_to)
+        expect = [('1', '2', '3')]
+        self.assertEquals(list(enumerate_3cliques(ftd)), expect)
+
+    def test_enumerate_3cliques_two(self):
+        from_to = [('1', '2'), ('2', '3'), ('3', '1'),
+                   ('4', '2'), ('3', '4') ]
+        ftd = compute_from_to_dictionary(from_to)
+        expect = [('1', '2', '3'), ('2', '3', '4')]
+        self.assertEquals(list(enumerate_3cliques(ftd)), expect)
+
+
 class TestMostConnectedPoint(unittest.TestCase):
     def setUp(self):
         """bad example, it's from DistanceMatrixToCoords/issues/5
         """
-        self.from_to = [("04", "10"), ("04", "18"), ("04", "19"), ("19", "10"),
-                        ("19", "18"), ("19", "14"), ("18", "10"), ("18", "14"),
-                        ("18", "02"), ("14", "02"), ("14", "21"), ("14", "12"),
+        self.from_to = [("18", "02"), ("14", "02"), ("14", "21"), ("14", "12"),
                         ("12", "02"), ("12", "21"), ("12", "03"), ("12", "16"),
                         ("16", "21"), ("16", "03"), ("16", "15"), ("16", "07"),
-                        ("16", "08"), ("08", "07"), ("08", "17"), ("08", "09"),
-                        ("08", "05"), ("05", "07"), ("05", "17"), ("05", "09"),
-                        ("09", "07"), ("09", "17"), ("07", "17"), ("07", "15"),
-                        ("17", "15"), ("17", "06"), ("06", "01"), ("06", "11"),
-                        ("06", "15"), ("11", "20"), ("11", "13"), ("11", "01"),
-                        ("13", "20"), ("13", "01"), ("13", "22"), ("13", "10"),
-                        ("13", "04"), ("01", "15"), ("01", "22"), ("22", "15"),
                         ("22", "03"), ("22", "02"), ("22", "10"), ("10", "02"),
                         ("10", "21"), ("10", "03"), ("21", "02"), ("21", "03"),
-                        ("03", "15"), ]
-        self.from_to_d = {}
-        for k, n in self.from_to:
-            self.from_to_d.setdefault(k, {})
-            self.from_to_d.setdefault(n, {})
-            self.from_to_d[k][n] = 0
-            self.from_to_d[n][k] = 0
+                        ('12', '18')]
 
     def test_best_clique(self):
-        expect = ('10', '13', '22')
-        self.assertEquals(most_connected_3clique(self.from_to_d, '10'), expect)
-        self.assertEquals(most_connected_3clique(self.from_to_d, '13'), expect)
-        self.assertEquals(most_connected_3clique(self.from_to_d, '22'), expect)
+        expect = ('12', '16', '21')
+        ftd = compute_from_to_dictionary(self.from_to)
+        self.assertEquals(most_connected_3clique(ftd), expect)
 
     def test_other_best_clique(self):
-        expect = ('07', '15', '16')
-        self.assertEquals(most_connected_3clique(self.from_to_d, '07'), expect)
-        self.assertEquals(most_connected_3clique(self.from_to_d, '15'), expect)
-        self.assertEquals(most_connected_3clique(self.from_to_d, '16'), expect)
-
-    def test_suboptimal_cliques(self):
-        expect = ('11', '13', '20')
-        self.assertEquals(most_connected_3clique(self.from_to_d, '20'), expect)
-        expect = ('01', '11', '13')
-        self.assertEquals(most_connected_3clique(self.from_to_d, '11'), expect)
-        expect = ('01', '15', '22')
-        self.assertEquals(most_connected_3clique(self.from_to_d, '01'), expect)
-
-    def test_best_clique_from_most_connected_point(self):
-        expect = ('10', '13', '22')
-        self.assertEquals(most_connected_3clique(self.from_to_d), expect)
+        self.from_to.extend([("03", "15"), ('02', '16'), ('02', '03'), ('21', '18')])
+        ftd = compute_from_to_dictionary(self.from_to)
+        expect = ('02', '12', '21')
+        self.assertEquals(most_connected_3clique(ftd), expect)
 
     def test_best_clique_completely_connects_to_most_points(self):
-        from_to = [("04", "10"), ("04", "18"), ("04", "19"), ("04", "20"), ("04", "02"),
-                   ("10", "18"), ("10", "19"), ("10", "20"), ("10", "02"), ("10", "21"),
-                   ("18", "19"), ("18", "20"), ("18", "02"), ("18", "12"),
-                   ("12", "14"), ("12", "21"), ("12", "03"), ("12", "16"),
-                   ("16", "21"), ("16", "03"), ]
+        from_to = [("04", "10"), ("04", "18"), ("04", "19"), ("04", "20"),
+                   ("04", "02"), ("10", "18"), ("10", "19"), ("10", "20"),
+                   ("10", "02"), ("10", "21"), ("18", "19"), ("18", "20"),
+                   ("18", "02"), ("18", "12"), ("12", "14"), ("12", "21"),
+                   ("12", "03"), ("12", "16"), ("16", "21"), ("16", "03")]
+        ftd = compute_from_to_dictionary(from_to)
         expect = ('04', '10', '18')
-        from_to_d = {}
-        for k, n in from_to:
-            from_to_d.setdefault(k, {})
-            from_to_d.setdefault(n, {})
-            from_to_d[k][n] = 0
-            from_to_d[n][k] = 0
-        self.assertEquals(most_connected_3clique(from_to_d), expect)
+        self.assertEquals(most_connected_3clique(ftd), expect)
 
 
 class TestInitialTriangle(unittest.TestCase):
