@@ -25,8 +25,8 @@ install:
   - sudo pip install --upgrade pep8
   - sudo pip install --upgrade pylint
   - sudo pip install python-coveralls
-  - sudo pip install python-numpy
-  - sudo pip install python-scipy
+  - sudo pip install numpy
+  - sudo pip install scipy
 
 before_script:
   - echo "Build starting on " `date`
