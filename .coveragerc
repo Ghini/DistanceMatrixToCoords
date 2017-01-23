@@ -1,0 +1,3 @@
+[run]
+omit = resources.py
+     plugin_upload.py
