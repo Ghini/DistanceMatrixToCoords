@@ -1,5 +1,5 @@
 # -#- coding: utf-8 -#-
-# 
+#
 # Copyright 2017 Mario Frasca <mario@anche.no>.
 #
 # This file is part of DistanceMatrixToCoordsDialog
@@ -33,7 +33,8 @@ from PyQt4 import QtGui, uic
 
 class DistanceMatrixToCoordsDialog(
         QtGui.QDialog, uic.loadUiType(os.path.join(
-            os.path.dirname(__file__), 'ghini_tree_position_dialog_base.ui'))[0]):
+            os.path.dirname(__file__),
+            'ghini_tree_position_dialog_base.ui'))[0]):
     def __init__(self, parent=None, iface=None):
         """Constructor."""
         super(DistanceMatrixToCoordsDialog, self).__init__(parent)
@@ -133,7 +134,8 @@ class DistanceMatrixToCoordsDialog(
 
 class GpsAndDistancesToAdjustedGpsDialog(
         QtGui.QDialog, uic.loadUiType(os.path.join(
-            os.path.dirname(__file__), 'ghini_correct_GPS_dialog_base.ui'))[0]):
+            os.path.dirname(__file__),
+            'ghini_correct_GPS_dialog_base.ui'))[0]):
     def __init__(self, parent=None, iface=None):
         """Constructor."""
         super(GpsAndDistancesToAdjustedGpsDialog, self).__init__(parent)
