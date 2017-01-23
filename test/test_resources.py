@@ -36,6 +36,6 @@ class DistanceMatrixToCoordsDialogTest(unittest.TestCase):
         path = ':/plugins/DistanceMatrixToCoords/gpsadjust.png'
         icon = QIcon(path)
         self.assertFalse(icon.isNull())
-        path = ':/plugins/DistanceMatrixToCoords/pointsfromdistances.png'
+        path = ':/plugins/DistanceMatrixToCoords/ptsadd.png'
         icon = QIcon(path)
         self.assertFalse(icon.isNull())

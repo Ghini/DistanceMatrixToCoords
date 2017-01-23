@@ -63,15 +63,26 @@ class DistanceMatrixToCoords:
             if qVersion() > '4.3.3':
                 QCoreApplication.installTranslator(self.translator)
 
-        # Create the dialogs (after translation)
-        self.pointsfromdistances = DistanceMatrixToCoordsDialog(iface=iface)
-        self.gpsadjust = GpsAndDistancesToAdjustedGpsDialog(iface=iface)
+        # provide information needed by initGui invoking add_action
+        self.dialogs = [
+            {'icon': ':/plugins/DistanceMatrixToCoords/ptsadd.png',
+             'class': DistanceMatrixToCoordsDialog,
+             'text': self.tr(u'add points using reference points '
+                             'and distances')},
+            {'icon': ':/plugins/DistanceMatrixToCoords/gpsadjust.png',
+             'class': GpsAndDistancesToAdjustedGpsDialog,
+             'text': self.tr(u'adjust GPS points using distances')}]
 
         # Create toolbar and menu. Actions will be added in self.initGui.
         self.actions = []
         self.menu = self.tr(u'&GhiniTreePositioner')
         self.toolbar = self.iface.addToolBar(u'DistanceMatrixToCoords')
         self.toolbar.setObjectName(u'DistanceMatrixToCoords')
+
+    def load_and_run(self, dialog_def):
+        if 'instance' not in dialog_def:
+            dialog_def['instance'] = dialog_def['class'](iface=self.iface)
+        return dialog_def['instance'].run()
 
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
@@ -163,18 +174,13 @@ class DistanceMatrixToCoords:
     def initGui(self):
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
 
-        icon_path = ':/plugins/DistanceMatrixToCoords/pointsfromdistances.png'
-        self.add_action(
-            icon_path,
-            text=self.tr(u'add points from distances'),
-            callback=self.pointsfromdistances.run,
-            parent=self.iface.mainWindow())
-        icon_path = ':/plugins/DistanceMatrixToCoords/gpsadjust.png'
-        self.add_action(
-            icon_path,
-            text=self.tr(u'adjust GPS points using distances'),
-            callback=self.gpsadjust.run,
-            parent=self.iface.mainWindow())
+        from functools import partial
+        for dialog_def in self.dialogs:
+            self.add_action(
+                dialog_def['icon'],
+                text=dialog_def['text'],
+                callback=partial(self.load_and_run, dialog_def),
+                parent=self.iface.mainWindow())
 
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""

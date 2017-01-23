@@ -57,7 +57,7 @@ class DistanceMatrixToCoordsDialog(
         self.lineEdit.clear()
         self.pushButton.clicked.connect(self.select_input_file)
 
-    def run(self):
+    def run(self, *args, **kwargs):
         """Run method that performs all the real work"""
 
         # work only on vector layers (where 0 means points)
@@ -171,7 +171,7 @@ class GpsAndDistancesToAdjustedGpsDialog(
             self, "Select distances file ", "", '*.csv')
         self.distances_le.setText(filename)
 
-    def run(self):
+    def run(self, *args, **kwargs):
         # prepare the dialog box with data from the project
 
         # work only on vector layers (where 0 means points)

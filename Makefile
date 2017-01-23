@@ -55,7 +55,7 @@ PY_FILES = \
 
 UI_FILES = ghini_tree_position_dialog_base.ui ghini_correct_GPS_dialog_base.ui
 
-EXTRAS = metadata.txt pointsfromdistances.png gpsadjust.png ghini-24.png
+EXTRAS = metadata.txt ptsadd.png gpsadjust.png ghini-24.png
 
 EXTRA_DIRS =
 

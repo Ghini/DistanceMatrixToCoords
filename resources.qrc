@@ -1,6 +1,6 @@
 <RCC>
     <qresource prefix="/plugins/DistanceMatrixToCoords" >
-        <file>pointsfromdistances.png</file>
+        <file>ptsadd.png</file>
         <file>gpsadjust.png</file>
     </qresource>
 </RCC>
