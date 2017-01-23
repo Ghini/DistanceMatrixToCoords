@@ -68,17 +68,15 @@ class DistanceMatrixToCoords:
             if qVersion() > '4.3.3':
                 QCoreApplication.installTranslator(self.translator)
 
-        # Create the dialog (after translation) and keep reference
-        self.dlg = DistanceMatrixToCoordsDialog()
-        self.dlg2 = GpsAndDistancesToAdjustedGpsDialog()
-        # Declare instance attributes
+        # Create the dialogs (after translation)
+        self.pointsfromdistances = DistanceMatrixToCoordsDialog(iface=iface)
+        self.gpsadjust = GpsAndDistancesToAdjustedGpsDialog(iface=iface)
+
+        # Create toolbar and menu. Actions will be added in self.initGui.
         self.actions = []
         self.menu = self.tr(u'&GhiniTreePositioner')
-        # TODO: We are going to let the user set this up in a future iteration
         self.toolbar = self.iface.addToolBar(u'DistanceMatrixToCoords')
         self.toolbar.setObjectName(u'DistanceMatrixToCoords')
-        self.dlg.lineEdit.clear()
-        self.dlg.pushButton.clicked.connect(self.select_input_file)
 
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
@@ -174,13 +172,13 @@ class DistanceMatrixToCoords:
         self.add_action(
             icon_path,
             text=self.tr(u'add points from distances'),
-            callback=self.pointsfromdistances_run,
+            callback=self.pointsfromdistances.run,
             parent=self.iface.mainWindow())
         icon_path = ':/plugins/DistanceMatrixToCoords/gpsadjust.png'
         self.add_action(
             icon_path,
             text=self.tr(u'adjust GPS points using distances'),
-            callback=self.gpsadjust_run,
+            callback=self.gpsadjust.run,
             parent=self.iface.mainWindow())
 
     def unload(self):
@@ -192,100 +190,6 @@ class DistanceMatrixToCoords:
             self.iface.removeToolBarIcon(action)
         # remove the toolbar
         del self.toolbar
-
-    def select_input_file(self):
-        filename = QFileDialog.getOpenFileName(
-            self.dlg, "Select distances file ", "", '*.csv')
-        self.dlg.lineEdit.setText(filename)
-
-    def gpsadjust_run(self):
-        # show the dialog
-        self.dlg2.show()
-        # Run the dialog event loop
-        result = self.dlg2.exec_()
-
-    def pointsfromdistances_run(self):
-        """Run method that performs all the real work"""
-
-        # work only on vector layers (where 0 means points)
-        layers = [l for l in self.iface.legendInterface().layers()
-                  if l.type() == l.VectorLayer and l.geometryType() == 0]
-        self.dlg.comboBox.addItems([l.name() for l in layers])
-
-        # show the dialog
-        self.dlg.show()
-        # Run the dialog event loop
-        result = self.dlg.exec_()
-
-        # See if OK was pressed
-        if result:
-            # get reference points from the layer
-            layer = layers[self.dlg.comboBox.currentIndex()]
-
-            # use position of first feature in layer to select local utm
-            f1 = layer.getFeatures().next()
-
-            local_utm = QgsCoordinateReferenceSystem()
-            local_utm.createFromProj4(utm_zone_proj4(f1.geometry().asPoint()))
-            transf = QgsCoordinateTransform(layer.crs(), local_utm)
-            back_transf = QgsCoordinateTransform(local_utm, layer.crs())
-
-            # populate 'points' dict with projected coordinates
-            points = {}
-            for feature in layer.getFeatures():
-                # we work with local utm projection
-                easting_northing = transf.transform(
-                    feature.geometry().asPoint())
-                point_id = feature['id']
-                points[point_id] = {'id': point_id,
-                                    'coordinates': easting_northing}
-
-            # get distances from csv file, and compute connectivity to
-            # referenced points
-            with open(self.dlg.lineEdit.text()) as f:
-                distances = get_distances_from_csv(f, points)
-
-            # compute missing coordinates
-            extrapolate_coordinates(points, distances)
-
-            # remember editable status
-            wasEditable = layer.isEditable()
-            # force editable if not already editable
-            if not wasEditable:
-                layer.startEditing()
-
-            fields = layer.fields()
-
-            featureList = []
-            # now add the computed points to the layer
-            for p in [p for p in points.values() if p['computed']]:
-                x, y = p['coordinates']
-                layerPoint = back_transf.transform(QgsPoint(x, y))
-                feature = QgsFeature(fields)
-                feature.setGeometry(QgsGeometry.fromPoint(layerPoint))
-                feature['id'] = p['id']
-                featureList.append(feature)
-
-            # bulk-add features to data provider associated to layer
-            (err, ids) = layer.dataProvider().addFeatures(featureList)
-            # set selection to new features - simplifies removing them in
-            # case user does not like the results
-            layer.setSelectedFeatures([i.id() for i in ids])
-
-            # some feedback about the result
-            still_missing = [p for p in points.values()
-                             if not p.get('coordinates')]
-            # TODO show the user which points we did not compute
-            from qgis.gui import QgsMessageBar
-            self.iface.messageBar().pushMessage(
-                "Info",
-                "success? %s; features added: %s; impossible to add: %s" % (
-                    err, len(ids), len(still_missing)),
-                level=QgsMessageBar.INFO)
-
-            # commit changes only if layer was not editable
-            if not wasEditable:
-                layer.commitChanges()
 
 
 def extrapolate_coordinates(points, distances):

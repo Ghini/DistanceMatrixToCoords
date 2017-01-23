@@ -9,12 +9,16 @@
 [general]
 name=GhiniTreePositioner
 qgisMinimumVersion=2.12
-description=Calculate point positions in 2D given a few reference points and a matrix of mutual horizontal distances
-version=0.3
+description=Combine GPS measurements with a thick network of mutual distance to get more and better 2D point locations.
+version=0.4
 author=Mario Frasca
 email=mario@anche.no
 
-about=This plugin solves the problem of estimating accurate positions for trees under a thick canopy, or for locations where high resolution aereal photos are not available. Points need a 'id' property, and the reference system needs be in the same units as the measured mutual distances. Mutual distances are given in the form of a dictionary of dictionaries of numerical values: one numerical value for each edge of which we have the measurement. The outer dictionary is indexed on the 'id' of the first end of the edge, the inner dictionary is indexed on the 'id' of the second end of the edge, the numerical value is the distance of the edge. Points are added to the vector layer containing the initial few reference points.
+about=This plugin solves the problem of estimating accurate positions for trees under a thick canopy, or for locations where high resolution aereal photos are not available.
+  Points need a 'id' property, and the measured mutual distances need be in metres.
+  Mutual distances are given in the form of a CVS table, three fields: from, to, distance.
+  The plugin offers two functionalities, one in which you ultimately trust the given geographic references and calculate the other positions from these reference points and using the mutual distances network; one in which you do not ultimately trust the GPS measurements, and you wish to correct them using a thick mutual distances network.
+  In the first case points are added to the vector layer containing the initial few reference points; in the second case the GPS measurements are on a read-only layer and the points are added to a second layer.
 
 tracker=http://github.com/Ghini/DistanceMatrixToCoords/issues
 repository=http://github.com/Ghini/DistanceMatrixToCoords/
