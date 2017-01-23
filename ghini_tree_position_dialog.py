@@ -63,6 +63,7 @@ class DistanceMatrixToCoordsDialog(
         # work only on vector layers (where 0 means points)
         layers = [l for l in self.iface.legendInterface().layers()
                   if l.type() == l.VectorLayer and l.geometryType() == 0]
+        self.comboBox.clear()
         self.comboBox.addItems([l.name() for l in layers])
 
         # show the dialog
@@ -176,7 +177,9 @@ class GpsAndDistancesToAdjustedGpsDialog(
         # work only on vector layers (where 0 means points)
         layers = [l for l in self.iface.legendInterface().layers()
                   if l.type() == l.VectorLayer and l.geometryType() == 0]
+        self.gps_points_cb.clear()
         self.gps_points_cb.addItems([l.name() for l in layers])
+        self.target_layer_cb.clear()
         self.target_layer_cb.addItems([l.name() for l in layers])
 
         # show the dialog
