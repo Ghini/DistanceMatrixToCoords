@@ -28,13 +28,14 @@ class DistanceMatrixToCoordsDialogTest(unittest.TestCase):
         """Runs after each test."""
         pass
 
-    def test_icon_png(self):
-        """Test we can load the icon."""
-        path = ':/plugins/DistanceMatrixToCoords/icon.png'
+    def test_icons_png(self):
+        """Test our icons work."""
+        path = ':/plugins/DistanceMatrixToCoords/ghini-24.png'
         icon = QIcon(path)
         self.assertFalse(icon.isNull())
-
-if __name__ == "__main__":
-    suite = unittest.makeSuite(DistanceMatrixToCoordsResourcesTest)
-    runner = unittest.TextTestRunner(verbosity=2)
-    runner.run(suite)
+        path = ':/plugins/DistanceMatrixToCoords/gpsadjust.png'
+        icon = QIcon(path)
+        self.assertFalse(icon.isNull())
+        path = ':/plugins/DistanceMatrixToCoords/pointsfromdistances.png'
+        icon = QIcon(path)
+        self.assertFalse(icon.isNull())
