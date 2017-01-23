@@ -53,6 +53,23 @@ class TestGetDistancesFromCsv(unittest.TestCase):
         from StringIO import StringIO
         s = StringIO('14,24,3\n14,25,4\n24,25,5\n')
         d = get_distances_from_csv(s, points)
+        self.assertTrue(len(points) == 3)
+        self.assertTrue('14' in points)
+        self.assertTrue('24' in points)
+        self.assertTrue('25' in points)
+        self.assertEquals(d['14']['24'], 3)
+        self.assertEquals(d['24']['14'], 3)
+        self.assertEquals(d['14']['25'], 4)
+        self.assertEquals(d['25']['14'], 4)
+        self.assertEquals(d['24']['25'], 5)
+        self.assertEquals(d['25']['24'], 5)
+
+    def test_get_distances_from_csv_with_header(self):
+        points = {}
+        from StringIO import StringIO
+        s = StringIO('f,t,d\n14,24,3\n14,25,4\n24,25,5\n')
+        d = get_distances_from_csv(s, points)
+        self.assertTrue(len(points) == 3)
         self.assertTrue('14' in points)
         self.assertTrue('24' in points)
         self.assertTrue('25' in points)

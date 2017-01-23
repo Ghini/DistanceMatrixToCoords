@@ -1,28 +1,27 @@
-# -*- coding: utf-8 -*-
-"""/***************************************************************************
- DistanceMatrixToCoords
- A QGIS plugin
- Calculate point positions in 2D given a few reference points and a matrix
- of mutual horizontal distances
-                              -------------------
-        begin                : 2017-01-04
-        git sha              : $Format:%H$
-        copyright            : (C) 2017 by Mario Frasca
-        email                : mario@anche.no
- ***************************************************************************/
+# -#- coding: utf-8 -#-
+#
+# Copyright 2017 Mario Frasca <mario@anche.no>.
+#
+# This file is part of DistanceMatrixToCoordsDialog
+#
+# DistanceMatrixToCoordsDialog is free software: you can redistribute it
+# and/or modify it under the terms of the GNU General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# DistanceMatrixToCoordsDialog is distributed in the hope that it will be
+# useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+# Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with DistanceMatrixToCoordsDialog. If not, see
+# <http://www.gnu.org/licenses/>.
+#
+# plugin class definition
 
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
-
-"""
 from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication
-from PyQt4.QtGui import QAction, QIcon, QFileDialog
+from PyQt4.QtGui import QAction, QIcon
 # Initialize Qt resources from file resources.py
 try:
     from DistanceMatrixToCoords import resources
@@ -32,10 +31,6 @@ except ImportError:
 from ghini_tree_position_dialog import DistanceMatrixToCoordsDialog
 from ghini_tree_position_dialog import GpsAndDistancesToAdjustedGpsDialog
 import os.path
-
-from qgis.core import (
-    QgsMapLayerRegistry, QgsCoordinateTransform, QgsCoordinateReferenceSystem,
-    QgsFeature, QgsGeometry, QgsPoint)
 
 
 class DistanceMatrixToCoords:
@@ -190,5 +185,3 @@ class DistanceMatrixToCoords:
             self.iface.removeToolBarIcon(action)
         # remove the toolbar
         del self.toolbar
-
-

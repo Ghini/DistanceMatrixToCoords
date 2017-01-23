@@ -26,6 +26,7 @@
 # widgets-and-dialogs-with-auto-connect in
 # http://qt-project.org/doc/qt-4.8/designer-using-a-ui-file.html
 
+
 class Heap:
     def __init__(self, elems):
         """creates a binary heap from list of dictionaries
@@ -407,5 +408,3 @@ def get_distances_from_csv(stream, points):
                                    distances.get(n, {}).keys()))
         point['computed'] = False
     return distances
-
-

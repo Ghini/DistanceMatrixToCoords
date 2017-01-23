@@ -1,6 +1,6 @@
 import unittest
 
-from ghini_tree_position import Heap
+from utils import Heap
 
 
 class HeapTest(unittest.TestCase):

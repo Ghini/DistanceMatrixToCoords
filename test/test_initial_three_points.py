@@ -10,12 +10,12 @@
 
 import unittest
 from numpy.testing import assert_almost_equal
-from ghini_tree_position import place_initial_three_points
-from ghini_tree_position import most_connected_3clique
-from ghini_tree_position import rigid_transform_points
-from ghini_tree_position import distance_between_homonyms
-from ghini_tree_position import compute_minimal_distance_transformation
-from ghini_tree_position import enumerate_3cliques
+from utils import place_initial_three_points
+from utils import most_connected_3clique
+from utils import rigid_transform_points
+from utils import distance_between_homonyms
+from utils import compute_minimal_distance_transformation
+from utils import enumerate_3cliques
 
 __author__ = 'mario@anche.no'
 __date__ = '2017-01-18'

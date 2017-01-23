@@ -17,3 +17,4 @@ i18n/latest_run
 test/gisquestion224812.py
 qgis-auth.db
 test/gisquestion224812-2.py
+htmlcov

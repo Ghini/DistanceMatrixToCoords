@@ -98,6 +98,7 @@ test: compile transcompile
 		export QGIS_LOG_FILE=/dev/null; \
 		nosetests -v --with-id --with-coverage --cover-package=. \
 		3>&1 1>&2 2>&3 3>&- || true
+	@python-coverage html
 	@echo "----------------------"                                        >/dev/null
 	@echo "If you get a 'no module named qgis.core error, try sourcing"   >/dev/null
 	@echo "the helper script we have provided first then run make test."  >/dev/null
@@ -109,9 +110,9 @@ deploy: compile doc transcompile
 	@echo "------------------------------------------"
 	@echo "Deploying plugin to your .qgis2 directory."
 	@echo "------------------------------------------"
-	# The deploy  target only works on unix like operating system where
-	# the Python plugin directory is located at:
-	# $HOME/$(QGISDIR)/python/plugins
+	@# The deploy  target only works on unix like operating system where
+	@# the Python plugin directory is located at:
+	@# $HOME/$(QGISDIR)/python/plugins
 	mkdir -p $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)
 	cp -vf $(PY_FILES) $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)
 	cp -vf $(UI_FILES) $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)
@@ -119,8 +120,8 @@ deploy: compile doc transcompile
 	cp -vf $(EXTRAS) $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)
 	cp -vfr i18n $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)
 	cp -vfr $(HELP) $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)/help
-	# Copy extra directories if any
-  # (temporarily removed)
+	@# Copy extra directories if any
+	@# (temporarily removed)
 
 
 # The dclean target removes compiled python files from plugin directory
@@ -146,17 +147,17 @@ zip: deploy dclean
 	@echo "---------------------------"
 	@echo "Creating plugin zip bundle."
 	@echo "---------------------------"
-	# The zip target deploys the plugin and creates a zip file with the deployed
-	# content. You can then upload the zip file on http://plugins.qgis.org
+	@# The zip target deploys the plugin and creates a zip file with the deployed
+	@# content. You can then upload the zip file on http://plugins.qgis.org
 	rm -f $(PLUGINNAME).zip
 	cd $(HOME)/$(QGISDIR)/python/plugins; zip -9r $(CURDIR)/$(PLUGINNAME).zip $(PLUGINNAME)
 
 package: compile
-	# Create a zip package of the plugin named $(PLUGINNAME).zip.
-	# This requires use of git (your plugin development directory must be a
-	# git repository).
-	# To use, pass a valid commit or tag as follows:
-	#   make package VERSION=Version_0.3.2
+	@# Create a zip package of the plugin named $(PLUGINNAME).zip.
+	@# This requires use of git (your plugin development directory must be a
+	@# git repository).
+	@# To use, pass a valid commit or tag as follows:
+	@#   make package VERSION=Version_0.3.2
 ifeq (k$(VERSION),k)
 	@echo try again, this time specifying the target VERSION
 else

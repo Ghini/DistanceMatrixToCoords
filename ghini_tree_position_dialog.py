@@ -29,6 +29,7 @@
 import os
 
 from PyQt4 import QtGui, uic
+from PyQt4.QtGui import QFileDialog
 
 from utils import Heap
 from utils import get_distances_from_csv
@@ -38,9 +39,14 @@ from utils import compute_minimal_distance_transformation
 from utils import place_initial_three_points
 from utils import rigid_transform_points
 
+from qgis.core import (
+    QgsCoordinateTransform, QgsCoordinateReferenceSystem,
+    QgsFeature, QgsGeometry, QgsPoint)
+
 
 class DistanceMatrixToCoordsDialog(
-        QtGui.QDialog, uic.loadUiType(os.path.join(
+        QtGui.QDialog,
+        uic.loadUiType(os.path.join(
             os.path.dirname(__file__),
             'ghini_tree_position_dialog_base.ui'))[0]):
     def __init__(self, parent=None, iface=None):
@@ -66,7 +72,7 @@ class DistanceMatrixToCoordsDialog(
 
         # See if OK was pressed
         if result:
-            # get reference points from the layer
+            # layer object containing reference points and acting as target
             layer = layers[self.comboBox.currentIndex()]
 
             # where are we in the world and which UTM system do we use to
@@ -78,7 +84,7 @@ class DistanceMatrixToCoordsDialog(
             f1 = layer.getFeatures().next()
             local_utm = QgsCoordinateReferenceSystem()
             local_utm.createFromProj4(utm_zone_proj4(
-                layer_to_wgs84(f1.geometry().asPoint())))
+                layer_to_wgs84.transform(f1.geometry().asPoint())))
             # define forward and backward transformations
             transf = QgsCoordinateTransform(layer.crs(), local_utm)
             back_transf = QgsCoordinateTransform(local_utm, layer.crs())
@@ -132,7 +138,7 @@ class DistanceMatrixToCoordsDialog(
             from qgis.gui import QgsMessageBar
             self.iface.messageBar().pushMessage(
                 "Info",
-                "success? %s; features added: %s; impossible to add: %s" % (
+                "success? %s; features added: %s; impossible to add: %s." % (
                     err, len(ids), len(still_missing)),
                 level=QgsMessageBar.INFO)
 
@@ -142,12 +148,13 @@ class DistanceMatrixToCoordsDialog(
 
     def select_input_file(self):
         filename = QFileDialog.getOpenFileName(
-            self.dlg, "Select distances file ", "", '*.csv')
+            self, "Select distances file ", "", '*.csv')
         self.lineEdit.setText(filename)
 
 
 class GpsAndDistancesToAdjustedGpsDialog(
-        QtGui.QDialog, uic.loadUiType(os.path.join(
+        QtGui.QDialog,
+        uic.loadUiType(os.path.join(
             os.path.dirname(__file__),
             'ghini_correct_GPS_dialog_base.ui'))[0]):
     def __init__(self, parent=None, iface=None):
@@ -155,9 +162,96 @@ class GpsAndDistancesToAdjustedGpsDialog(
         super(GpsAndDistancesToAdjustedGpsDialog, self).__init__(parent)
         self.setupUi(self)
         self.iface = iface
+        self.distances_le.clear()
+        self.pushButton.clicked.connect(self.select_input_file)
+
+    def select_input_file(self):
+        filename = QFileDialog.getOpenFileName(
+            self, "Select distances file ", "", '*.csv')
+        self.distances_le.setText(filename)
 
     def run(self):
+        # prepare the dialog box with data from the project
+
+        # work only on vector layers (where 0 means points)
+        layers = [l for l in self.iface.legendInterface().layers()
+                  if l.type() == l.VectorLayer and l.geometryType() == 0]
+        self.gps_points_cb.addItems([l.name() for l in layers])
+        self.target_layer_cb.addItems([l.name() for l in layers])
+
         # show the dialog
         self.show()
         # Run the dialog event loop
         result = self.exec_()
+        # See if OK was pressed
+        if result:
+            # which layers are we working on?
+            gps_points_layer = layers[self.gps_points_cb.currentIndex()]
+            target_layer = layers[self.target_layer_cb.currentIndex()]
+
+            # where are we in the world and which UTM system do we use to
+            # perform our metric operations?
+            layer_to_wgs84 = QgsCoordinateTransform(
+                gps_points_layer.crs(),
+                QgsCoordinateReferenceSystem(4326))
+            # use WGS84 position of first feature to select local UTM
+            f1 = gps_points_layer.getFeatures().next()
+            local_utm = QgsCoordinateReferenceSystem()
+            local_utm.createFromProj4(utm_zone_proj4(
+                layer_to_wgs84.transform(f1.geometry().asPoint())))
+            # define forward and backward transformations
+            transf = QgsCoordinateTransform(gps_points_layer.crs(), local_utm)
+            back_transf = QgsCoordinateTransform(local_utm, target_layer.crs())
+
+            # 'gps_points' projected coordinates
+            gps_points = {}
+            for feature in gps_points_layer.getFeatures():
+                # we work with local utm projection
+                easting_northing = transf.transform(
+                    feature.geometry().asPoint())
+                point_id = feature['id']
+                gps_points[point_id] = {'id': point_id,
+                                        'coordinates': easting_northing}
+
+            # computed_points is our goal
+            computed_points = {}
+            # get distances from csv file, and initialize connectivity to 0
+            with open(self.distances_le.text()) as f:
+                distances = get_distances_from_csv(f, computed_points)
+
+            place_initial_three_points(computed_points, distances, gps_points)
+            extrapolate_coordinates(computed_points, distances)
+            t = compute_minimal_distance_transformation(computed_points,
+                                                        gps_points)
+            pts = rigid_transform_points(points, *t)
+
+            # the two layers have the same set of fields, including 'id'
+            fields = target_layer.fields()
+
+            features = []
+            for key, pt in pts.items():
+                new_pt = QgsFeature(fields)
+                new_pt['id'] = key
+                computed_pos = back_transf.transform(*pt['coordinates'])
+                new_pt.setGeometry(QgsGeometry.fromPoint(computed_pos))
+                features.append(new_pt)
+
+            wasEditable = target_layer.isEditable()
+            if not wasEditable:
+                target_layer.startEditing()
+
+            # bulk-add features to data provider associated to layer
+            (err, ids) = target_layer.dataProvider().addFeatures(features)
+
+            # set selection to new features - simplifies removing them in
+            # case user does not like the results
+            target_layer.setSelectedFeatures([i.id() for i in ids])
+
+            if not wasEditable:
+                target_layer.commitChanges()
+
+            from qgis.gui import QgsMessageBar
+            self.iface.messageBar().pushMessage(
+                "Info",
+                "success? %s; features added: %s." % (err, len(ids)),
+                level=QgsMessageBar.INFO)

@@ -1,6 +1,6 @@
 import unittest
 
-from ghini_tree_position import almost_parallel, normalize
+from utils import almost_parallel, normalize
 
 
 class UtilsTest(unittest.TestCase):
