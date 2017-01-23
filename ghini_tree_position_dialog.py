@@ -95,8 +95,8 @@ class DistanceMatrixToCoordsDialog(
                 # we work with local utm projection
                 easting_northing = transf.transform(
                     feature.geometry().asPoint())
-                point_id = feature['id']
-                points[point_id] = {'id': point_id,
+                point_id = feature['code']
+                points[point_id] = {'code': point_id,
                                     'coordinates': easting_northing}
 
             # get distances from csv file, and compute connectivity to
@@ -122,7 +122,7 @@ class DistanceMatrixToCoordsDialog(
                 layerPoint = back_transf.transform(QgsPoint(x, y))
                 feature = QgsFeature(fields)
                 feature.setGeometry(QgsGeometry.fromPoint(layerPoint))
-                feature['id'] = p['id']
+                feature['code'] = p['code']
                 featureList.append(feature)
 
             # bulk-add features to data provider associated to layer
@@ -209,8 +209,8 @@ class GpsAndDistancesToAdjustedGpsDialog(
                 # we work with local utm projection
                 easting_northing = transf.transform(
                     feature.geometry().asPoint())
-                point_id = feature['id']
-                gps_points[point_id] = {'id': point_id,
+                point_id = feature['code']
+                gps_points[point_id] = {'code': point_id,
                                         'coordinates': easting_northing}
 
             # computed_points is our goal
@@ -223,15 +223,15 @@ class GpsAndDistancesToAdjustedGpsDialog(
             extrapolate_coordinates(computed_points, distances)
             t = compute_minimal_distance_transformation(computed_points,
                                                         gps_points)
-            pts = rigid_transform_points(points, *t)
+            pts = rigid_transform_points(computed_points, *t)
 
-            # the two layers have the same set of fields, including 'id'
+            # the two layers have the same set of fields, including 'code'
             fields = target_layer.fields()
 
             features = []
             for key, pt in pts.items():
                 new_pt = QgsFeature(fields)
-                new_pt['id'] = key
+                new_pt['code'] = key
                 computed_pos = back_transf.transform(*pt['coordinates'])
                 new_pt.setGeometry(QgsGeometry.fromPoint(computed_pos))
                 features.append(new_pt)
