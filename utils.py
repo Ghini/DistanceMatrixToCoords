@@ -341,13 +341,6 @@ def utm_zone_proj4(pt):
     return wkt
 
 
-def solve_puzzle(points, distances, proj_gps):
-    place_initial_three_points(points, distances, proj_gps)
-    extrapolate_coordinates(points, distances)
-    t = compute_minimal_distance_transformation(points, proj_gps)
-    return rigid_transform_points(points, *t)
-
-
 def extrapolate_coordinates(points, distances):
     """compute missing coordinates respecting distances and given points
 
