@@ -49,6 +49,7 @@ PLUGINNAME = DistanceMatrixToCoords
 
 PY_FILES = \
 	__init__.py \
+	utils.py \
 	ghini_tree_position_dialog.py \
 	ghini_tree_position.py
 

@@ -30,6 +30,14 @@ import os
 
 from PyQt4 import QtGui, uic
 
+from utils import Heap
+from utils import get_distances_from_csv
+from utils import utm_zone_proj4
+from utils import extrapolate_coordinates
+from utils import compute_minimal_distance_transformation
+from utils import place_initial_three_points
+from utils import rigid_transform_points
+
 
 class DistanceMatrixToCoordsDialog(
         QtGui.QDialog, uic.loadUiType(os.path.join(
@@ -61,11 +69,17 @@ class DistanceMatrixToCoordsDialog(
             # get reference points from the layer
             layer = layers[self.comboBox.currentIndex()]
 
-            # use position of first feature in layer to select local utm
+            # where are we in the world and which UTM system do we use to
+            # perform our metric operations?
+            layer_to_wgs84 = QgsCoordinateTransform(
+                layer.crs(),
+                QgsCoordinateReferenceSystem(4326))
+            # use WGS84 position of first feature to select local UTM
             f1 = layer.getFeatures().next()
-
             local_utm = QgsCoordinateReferenceSystem()
-            local_utm.createFromProj4(utm_zone_proj4(f1.geometry().asPoint()))
+            local_utm.createFromProj4(utm_zone_proj4(
+                layer_to_wgs84(f1.geometry().asPoint())))
+            # define forward and backward transformations
             transf = QgsCoordinateTransform(layer.crs(), local_utm)
             back_transf = QgsCoordinateTransform(local_utm, layer.crs())
 

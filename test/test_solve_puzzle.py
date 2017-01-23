@@ -2,12 +2,12 @@
 
 import unittest
 from numpy.testing import assert_almost_equal
-from ghini_tree_position import solve_puzzle, get_distances_from_csv
-from ghini_tree_position import utm_zone_proj4
-from ghini_tree_position import extrapolate_coordinates
-from ghini_tree_position import compute_minimal_distance_transformation
-from ghini_tree_position import place_initial_three_points
-from ghini_tree_position import rigid_transform_points
+from utils import solve_puzzle, get_distances_from_csv
+from utils import utm_zone_proj4
+from utils import extrapolate_coordinates
+from utils import compute_minimal_distance_transformation
+from utils import place_initial_three_points
+from utils import rigid_transform_points
 
 
 class TestUTMChoice(unittest.TestCase):
