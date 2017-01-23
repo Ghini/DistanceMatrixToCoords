@@ -98,7 +98,7 @@ test: compile transcompile
 		export QGIS_LOG_FILE=/dev/null; \
 		nosetests -v --with-id --with-coverage --cover-package=. \
 		3>&1 1>&2 2>&3 3>&- || true
-	@python-coverage html
+	@if [ $(which python-coverage | wc -l)==1 ]; then python-coverage html; fi
 	@echo "----------------------"                                        >/dev/null
 	@echo "If you get a 'no module named qgis.core error, try sourcing"   >/dev/null
 	@echo "the helper script we have provided first then run make test."  >/dev/null
