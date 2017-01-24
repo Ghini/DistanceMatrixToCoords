@@ -8,7 +8,7 @@ help/build
 .noseids
 
 resources.py
-distances-aligned.csv
+distances*.csv
 i18n/*.qm
 DistanceMatrixToCoords.zip
 i18n/latest_run
