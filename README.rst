@@ -8,14 +8,22 @@ This plugin solves the problem of estimating accurate positions for trees under 
 how does it work
 ------------------
 
-Points need a 'id' property, and the reference system needs be in the same units as the measured mutual distances. Mutual distances are given in the form of a comma separated file, first two columns are the 'id' of to points, third column their distance, in the same measurement unit as the one in the layer.
+Points need a 'id' property, and mutual distances must be measured in metres. Mutual distances are given in the form of a comma separated file, first two columns are the 'id' of to points, third column their distance.
 
+The plugin implements two separate functionalities:
+
+1. new points
+~~~~~~~~~~~~~
 Points already in the layer will be used as reference, Points referred to in the mutual distances file, but not in the layer, they will be added to the layer, as precisely as possible
+
+2. GPS correction
+~~~~~~~~~~~~~~~~~
+You work on two layers, one with GPS data, one with the output from the plugin. The mutual distances network will be used to compute the correct pattern on the ground, the precise relative position of the points. This need not necessarily match the GPS data. This pattern is them rigidly moved to minimize the square distances to the corresponding GPS locations.
 
 does it really work
 ----------------------
 
-This plugin is at a very experimental stage. I will be enhancing it as I need that, or as reaction to user feedback.
+I consider this plugin still at a rather experimental stage, but "yes, of course it works!" I will be enhancing it as I need that, or as reaction to user feedback.
 
 It would be highly useful if you could provide me with example data, for which, I'm quite sure, the plugin does not yet work.
 
