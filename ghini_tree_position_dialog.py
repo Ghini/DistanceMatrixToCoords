@@ -29,7 +29,7 @@
 import os
 
 from PyQt4 import QtGui, uic
-from PyQt4.QtGui import QFileDialog
+from PyQt4.QtGui import QFileDialog, QDialogButtonBox
 
 from utils import Heap
 from utils import get_distances_from_csv
@@ -44,8 +44,25 @@ from qgis.core import (
     QgsFeature, QgsGeometry, QgsPoint)
 
 
+class GhiniBaseDialog(QtGui.QDialog):
+
+    def computeOKEnabled(self):
+        is_valid_selection = self.key_name_cb.currentIndex() > 0
+        is_valid_file = os.path.isfile(self.distances_le.text())
+        self.buttonOK.setEnabled(is_valid_file and is_valid_selection)
+
+    def on_change_key_name(self):
+        self.key_name = self.key_names[self.key_name_cb.currentIndex()]
+        if self.key_name_cb.currentIndex() == 0:
+            self.key_name = None
+        self.computeOKEnabled()
+
+    def on_file_changed(self):
+        self.computeOKEnabled()
+
+
 class DistanceMatrixToCoordsDialog(
-        QtGui.QDialog,
+        GhiniBaseDialog,
         uic.loadUiType(os.path.join(
             os.path.dirname(__file__),
             'ghini_tree_position_dialog_base.ui'))[0]):
@@ -53,19 +70,51 @@ class DistanceMatrixToCoordsDialog(
     def __init__(self, parent=None, iface=None):
         """Constructor."""
         super(DistanceMatrixToCoordsDialog, self).__init__(parent)
+        self.self = self
         self.iface = iface
         self.setupUi(self)
-        self.lineEdit.clear()
+        self.distances_le.clear()
         self.pushButton.clicked.connect(self.select_input_file)
+        try:
+            self.layers = [l for l in self.iface.legendInterface().layers()
+                           if l.type() == l.VectorLayer
+                           and l.geometryType() == 0]
+        except AttributeError:  # happens when testing
+            self.layers = []
+        self.buttonOK = self.button_box.button(QDialogButtonBox.Ok)
+        self.buttonOK.setEnabled(False)
+        self.key_names = ['choose-one']
+        self.key_name = None
+
+    def on_change_layer(self):
+        # construct list of key names
+        layer = self.layers[self.comboBox.currentIndex()]
+        field_names = [i.name() for i in layer.fields()]
+
+        # changing widget status will invoke on_change_key_name callback,
+        # which in turn will alter self.key_name
+        key_name = self.key_name
+
+        # recompute key_names from current layer
+        self.key_names = ['<choose-one>'] + sorted(field_names)
+        self.key_name_cb.clear()
+        self.key_name_cb.addItems(self.key_names)
+
+        # check whether previous key_name is still a valid option
+        if key_name in self.key_names[1:]:
+            self.key_name_cb.setCurrentIndex(self.key_names.index(key_name))
+        else:
+            self.key_name_cb.setCurrentIndex(0)
+
+        # recompute OK enabled/disabled
+        self.computeOKEnabled()
 
     def run(self, *args, **kwargs):
         """Run method that performs all the real work"""
 
         # work only on vector layers (where 0 means points)
-        layers = [l for l in self.iface.legendInterface().layers()
-                  if l.type() == l.VectorLayer and l.geometryType() == 0]
         self.comboBox.clear()
-        self.comboBox.addItems([l.name() for l in layers])
+        self.comboBox.addItems([l.name() for l in self.layers])
 
         # show the dialog
         self.show()
@@ -75,7 +124,7 @@ class DistanceMatrixToCoordsDialog(
         # See if OK was pressed
         if result:
             # layer object containing reference points and acting as target
-            layer = layers[self.comboBox.currentIndex()]
+            layer = self.layers[self.comboBox.currentIndex()]
 
             # where are we in the world and which UTM system do we use to
             # perform our metric operations?
@@ -103,7 +152,7 @@ class DistanceMatrixToCoordsDialog(
 
             # get distances from csv file, and compute connectivity to
             # referenced points
-            with open(self.lineEdit.text()) as f:
+            with open(self.distances_le.text()) as f:
                 distances = get_distances_from_csv(f, points)
 
             # compute missing coordinates
@@ -151,11 +200,11 @@ class DistanceMatrixToCoordsDialog(
     def select_input_file(self):
         filename = QFileDialog.getOpenFileName(
             self, "Select distances file ", "", '*.csv')
-        self.lineEdit.setText(filename)
+        self.distances_le.setText(filename)
 
 
 class GpsAndDistancesToAdjustedGpsDialog(
-        QtGui.QDialog,
+        GhiniBaseDialog,
         uic.loadUiType(os.path.join(
             os.path.dirname(__file__),
             'ghini_correct_GPS_dialog_base.ui'))[0]):
@@ -176,20 +225,6 @@ class GpsAndDistancesToAdjustedGpsDialog(
         self.buttonOK = self.button_box.buttons()[0]
         self.buttonOK.setEnabled(False)
 
-    def computeOKEnabled(self):
-        is_valid_selection = self.key_name_cb.currentIndex() > 0
-        is_valid_file = os.path.isfile(self.distances_le.text())
-        self.buttonOK.setEnabled(is_valid_file and is_valid_selection)
-
-    def on_change_key_name(self):
-        self.key_name = self.key_names[self.key_name_cb.currentIndex()]
-        if self.key_name_cb.currentIndex() == 0:
-            self.key_name = None
-        self.computeOKEnabled()
-
-    def on_file_changed(self):
-        self.computeOKEnabled()
-
     def on_change_layer(self):
         # construct list of key names
         gps_points_layer = self.layers[self.gps_points_cb.currentIndex()]
@@ -201,6 +236,7 @@ class GpsAndDistancesToAdjustedGpsDialog(
 
         self.key_name_cb.clear()
         self.key_name_cb.addItems(self.key_names)
+        self.on_change_key_name()
         key_name = self.key_name
         if key_name in self.key_names[1:]:
             self.key_name_cb.setCurrentIndex(self.key_names.index(key_name))

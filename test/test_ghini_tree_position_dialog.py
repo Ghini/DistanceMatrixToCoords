@@ -31,10 +31,16 @@ class DistanceMatrixToCoordsDialogTest(unittest.TestCase):
         """Runs after each test."""
         self.dialog = None
 
-    def test_dialog_ok(self):
-        """Test we can click OK."""
-
+    def test_dialog_ok_disabled(self):
         button = self.dialog.button_box.button(QDialogButtonBox.Ok)
+        self.assertEqual(button.isEnabled(), False)
+        button.click()
+        result = self.dialog.result()
+        self.assertEqual(result, 0)
+
+    def test_dialog_ok_enabled(self):
+        button = self.dialog.button_box.button(QDialogButtonBox.Ok)
+        button.setEnabled(True)
         button.click()
         result = self.dialog.result()
         self.assertEqual(result, QDialog.Accepted)
@@ -42,6 +48,7 @@ class DistanceMatrixToCoordsDialogTest(unittest.TestCase):
     def test_dialog_cancel(self):
         """Test we can click cancel."""
         button = self.dialog.button_box.button(QDialogButtonBox.Cancel)
+        self.assertEqual(button.isEnabled(), True)
         button.click()
         result = self.dialog.result()
         self.assertEqual(result, QDialog.Rejected)

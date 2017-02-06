@@ -7,20 +7,20 @@
     <x>0</x>
     <y>0</y>
     <width>333</width>
-    <height>135</height>
+    <height>165</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>GhiniTreePositioner</string>
   </property>
-  <widget class="QLineEdit" name="lineEdit">
+  <widget class="QLineEdit" name="distances_le">
    <property name="enabled">
     <bool>true</bool>
    </property>
    <property name="geometry">
     <rect>
      <x>19</x>
-     <y>68</y>
+     <y>98</y>
      <width>268</width>
      <height>25</height>
     </rect>
@@ -42,7 +42,7 @@
    <property name="geometry">
     <rect>
      <x>294</x>
-     <y>68</y>
+     <y>98</y>
      <width>24</width>
      <height>25</height>
     </rect>
@@ -61,7 +61,7 @@
    <property name="geometry">
     <rect>
      <x>19</x>
-     <y>99</y>
+     <y>129</y>
      <width>300</width>
      <height>25</height>
     </rect>
@@ -83,7 +83,7 @@
    <property name="geometry">
     <rect>
      <x>19</x>
-     <y>41</y>
+     <y>70</y>
      <width>135</width>
      <height>21</height>
     </rect>
@@ -113,6 +113,29 @@
    </property>
    <property name="text">
     <string>choose a layer</string>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="key_name_cb">
+   <property name="geometry">
+    <rect>
+     <x>183</x>
+     <y>40</y>
+     <width>136</width>
+     <height>25</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_3">
+   <property name="geometry">
+    <rect>
+     <x>19</x>
+     <y>40</y>
+     <width>96</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>name of key</string>
    </property>
   </widget>
  </widget>
@@ -149,6 +172,24 @@
      <y>20</y>
     </hint>
    </hints>
+  </connection>
+  <connection>
+   <sender>comboBox</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>self</receiver>
+   <slot>on_change_layer()</slot>
+  </connection>
+  <connection>
+   <sender>key_name_cb</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>self</receiver>
+   <slot>on_change_key_name</slot>
+  </connection>
+  <connection>
+   <sender>distances_le</sender>
+   <signal>textChanged(QString)</signal>
+   <receiver>self</receiver>
+   <slot>on_file_changed</slot>
   </connection>
  </connections>
 </ui>
