@@ -49,6 +49,7 @@ class DistanceMatrixToCoordsDialog(
         uic.loadUiType(os.path.join(
             os.path.dirname(__file__),
             'ghini_tree_position_dialog_base.ui'))[0]):
+
     def __init__(self, parent=None, iface=None):
         """Constructor."""
         super(DistanceMatrixToCoordsDialog, self).__init__(parent)
@@ -96,7 +97,7 @@ class DistanceMatrixToCoordsDialog(
                 # we work with local utm projection
                 easting_northing = transf.transform(
                     feature.geometry().asPoint())
-                point_id = feature['code']
+                point_id = feature[self.key_name]
                 points[point_id] = {'code': point_id,
                                     'coordinates': easting_northing}
 
@@ -123,7 +124,7 @@ class DistanceMatrixToCoordsDialog(
                 layerPoint = back_transf.transform(QgsPoint(x, y))
                 feature = QgsFeature(fields)
                 feature.setGeometry(QgsGeometry.fromPoint(layerPoint))
-                feature['code'] = p['code']
+                feature[self.key_name] = p['code']
                 featureList.append(feature)
 
             # bulk-add features to data provider associated to layer
@@ -158,13 +159,55 @@ class GpsAndDistancesToAdjustedGpsDialog(
         uic.loadUiType(os.path.join(
             os.path.dirname(__file__),
             'ghini_correct_GPS_dialog_base.ui'))[0]):
+
     def __init__(self, parent=None, iface=None):
         """Constructor."""
         super(GpsAndDistancesToAdjustedGpsDialog, self).__init__(parent)
+        self.self = self
         self.setupUi(self)
         self.iface = iface
         self.distances_le.clear()
         self.pushButton.clicked.connect(self.select_input_file)
+        self.key_names = ['choose-one']
+        self.key_name = None
+        # work only on vector layers (where 0 means points)
+        self.layers = [l for l in self.iface.legendInterface().layers()
+                       if l.type() == l.VectorLayer and l.geometryType() == 0]
+        self.buttonOK = self.button_box.buttons()[0]
+        self.buttonOK.setEnabled(False)
+
+    def computeOKEnabled(self):
+        is_valid_selection = self.key_name_cb.currentIndex() > 0
+        is_valid_file = os.path.isfile(self.distances_le.text())
+        self.buttonOK.setEnabled(is_valid_file and is_valid_selection)
+
+    def on_change_key_name(self):
+        self.key_name = self.key_names[self.key_name_cb.currentIndex()]
+        if self.key_name_cb.currentIndex() == 0:
+            self.key_name = None
+        self.computeOKEnabled()
+
+    def on_file_changed(self):
+        self.computeOKEnabled()
+
+    def on_change_layer(self):
+        # construct list of key names
+        gps_points_layer = self.layers[self.gps_points_cb.currentIndex()]
+        target_layer = self.layers[self.target_layer_cb.currentIndex()]
+        gps_points_field_names = [i.name() for i in gps_points_layer.fields()]
+        target_field_names = [i.name() for i in target_layer.fields()]
+        self.key_names = ['<choose-one>'] + sorted(set(gps_points_field_names)
+                                                 .union(target_field_names))
+
+        self.key_name_cb.clear()
+        self.key_name_cb.addItems(self.key_names)
+        key_name = self.key_name
+        if key_name in self.key_names[1:]:
+            self.key_name_cb.setCurrentIndex(self.key_names.index(key_name))
+        else:
+            self.key_name_cb.setCurrentIndex(0)
+            self.key_name = None
+        self.computeOKEnabled()
 
     def select_input_file(self):
         filename = QFileDialog.getOpenFileName(
@@ -174,13 +217,10 @@ class GpsAndDistancesToAdjustedGpsDialog(
     def run(self, *args, **kwargs):
         # prepare the dialog box with data from the project
 
-        # work only on vector layers (where 0 means points)
-        layers = [l for l in self.iface.legendInterface().layers()
-                  if l.type() == l.VectorLayer and l.geometryType() == 0]
         self.gps_points_cb.clear()
-        self.gps_points_cb.addItems([l.name() for l in layers])
+        self.gps_points_cb.addItems([l.name() for l in self.layers])
         self.target_layer_cb.clear()
-        self.target_layer_cb.addItems([l.name() for l in layers])
+        self.target_layer_cb.addItems([l.name() for l in self.layers])
 
         # show the dialog
         self.show()
@@ -189,8 +229,8 @@ class GpsAndDistancesToAdjustedGpsDialog(
         # See if OK was pressed
         if result:
             # which layers are we working on?
-            gps_points_layer = layers[self.gps_points_cb.currentIndex()]
-            target_layer = layers[self.target_layer_cb.currentIndex()]
+            gps_points_layer = self.layers[self.gps_points_cb.currentIndex()]
+            target_layer = self.layers[self.target_layer_cb.currentIndex()]
 
             # where are we in the world and which UTM system do we use to
             # perform our metric operations?
@@ -212,7 +252,7 @@ class GpsAndDistancesToAdjustedGpsDialog(
                 # we work with local utm projection
                 easting_northing = transf.transform(
                     feature.geometry().asPoint())
-                point_id = feature['code']
+                point_id = feature[self.key_name]
                 gps_points[point_id] = {'code': point_id,
                                         'coordinates': easting_northing}
 

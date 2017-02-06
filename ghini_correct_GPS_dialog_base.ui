@@ -7,17 +7,40 @@
     <x>0</x>
     <y>0</y>
     <width>333</width>
-    <height>177</height>
+    <height>207</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>GhiniTreePositioner</string>
   </property>
+  <widget class="QLabel" name="key_name_lb">
+   <property name="geometry">
+    <rect>
+     <x>18</x>
+     <y>70</y>
+     <width>151</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>name of key</string>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="key_name_cb">
+   <property name="geometry">
+    <rect>
+     <x>184</x>
+     <y>70</y>
+     <width>136</width>
+     <height>26</height>
+    </rect>
+   </property>
+  </widget>
   <widget class="QLabel" name="distances_lb">
    <property name="geometry">
     <rect>
      <x>18</x>
-     <y>80</y>
+     <y>110</y>
      <width>135</width>
      <height>20</height>
     </rect>
@@ -33,7 +56,7 @@
    <property name="geometry">
     <rect>
      <x>18</x>
-     <y>108</y>
+     <y>138</y>
      <width>268</width>
      <height>25</height>
     </rect>
@@ -55,7 +78,7 @@
    <property name="geometry">
     <rect>
      <x>294</x>
-     <y>108</y>
+     <y>138</y>
      <width>24</width>
      <height>24</height>
     </rect>
@@ -74,7 +97,7 @@
    <property name="geometry">
     <rect>
      <x>18</x>
-     <y>140</y>
+     <y>170</y>
      <width>300</width>
      <height>25</height>
     </rect>
@@ -172,6 +195,30 @@
      <y>20</y>
     </hint>
    </hints>
+  </connection>
+  <connection>
+   <sender>gps_points_cb</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>self</receiver>
+   <slot>on_change_layer()</slot>
+  </connection>
+  <connection>
+   <sender>target_layer_cb</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>self</receiver>
+   <slot>on_change_layer()</slot>
+  </connection>
+  <connection>
+   <sender>key_name_cb</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>self</receiver>
+   <slot>on_change_key_name</slot>
+  </connection>
+  <connection>
+   <sender>distances_le</sender>
+   <signal>textChanged(QString)</signal>
+   <receiver>self</receiver>
+   <slot>on_file_changed</slot>
   </connection>
  </connections>
 </ui>
