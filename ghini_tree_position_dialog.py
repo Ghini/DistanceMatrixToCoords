@@ -76,9 +76,9 @@ class DistanceMatrixToCoordsDialog(
         self.distances_le.clear()
         self.pushButton.clicked.connect(self.select_input_file)
         try:
-            self.layers = [l for l in self.iface.legendInterface().layers()
-                           if l.type() == l.VectorLayer
-                           and l.geometryType() == 0]
+            self.layers = [
+                l for l in self.iface.legendInterface().layers()
+                if l.type() == l.VectorLayer and l.geometryType() == 0]
         except AttributeError:  # happens when testing
             self.layers = []
         self.buttonOK = self.button_box.button(QDialogButtonBox.Ok)
@@ -232,7 +232,7 @@ class GpsAndDistancesToAdjustedGpsDialog(
         gps_points_field_names = [i.name() for i in gps_points_layer.fields()]
         target_field_names = [i.name() for i in target_layer.fields()]
         self.key_names = ['<choose-one>'] + sorted(set(gps_points_field_names)
-                                                 .union(target_field_names))
+                                                   .union(target_field_names))
 
         self.key_name_cb.clear()
         self.key_name_cb.addItems(self.key_names)
