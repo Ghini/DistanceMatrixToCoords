@@ -18,7 +18,7 @@ Points already in the layer will be used as reference, Points referred to in the
 
 2. GPS correction
 ~~~~~~~~~~~~~~~~~
-You work on two layers, one with GPS data, one with the output from the plugin. The mutual distances network will be used to compute the correct pattern on the ground, the precise relative position of the points. This need not necessarily match the GPS data. This pattern is them rigidly moved to minimize the square distances to the corresponding GPS locations.
+You work on two layers, one with GPS data, one with the output from the plugin. The mutual distances network will be used to compute the correct pattern on the ground, the precise relative position of the points. This need not necessarily match the GPS data. This pattern is then rigidly moved to minimize the square distances to the corresponding GPS locations.
 
 does it really work
 ----------------------
