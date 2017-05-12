@@ -71,3 +71,63 @@ and we get the result in the same layer.
     :align: center
     :height: 350px
     :alt: initial state
+
+what about the GPS correction
+-----------------------------
+
+this is slightly more sofisticated. imagine you have GPS point measurements
+which you quite rightfully do not blindly trust. so what you do is you
+measure mutual distances among physical points, and you do trust the
+correctness of these mutual distances.
+
+this GPS correction tool uses the mutual distances to generate a rigid frame
+which it fits with the GPS point measurements. the resulting points set
+minimizes the sum of square distances from the points as coming from your
+GPS device.
+
+graphically, we have the following set of points. this represents the real
+situation on the ground, which GPS measurements can only approximate.
+
+.. image:: doc-resources/case02-01.png
+    :width: 500px
+    :align: center
+    :height: 500px
+
+this is the GPS approximation of reality, plotted together with reality,
+which we hope to approximate better. as you can appreciate, the shape of the
+patterns formed by the GPS approximation are so different from the real
+patterns that a map based on only these GPS points would be difficult to use
+in practice.
+
+.. image:: doc-resources/case02-02.png
+    :width: 500px
+    :align: center
+    :height: 500px
+
+this picture shows the data we feed to the GPS correction tool: the GPS
+data, and a numerical matrix of mutual distances, which we here show as a
+rigid frame. don't be confused by the position of the frame, we don't really
+know where to put the frame.
+
+.. image:: doc-resources/case02-03.png
+    :width: 500px
+    :align: center
+    :height: 500px
+
+the result is a better approximation of the real situation on the ground, as
+you can see here, where we first compare it to the GPS measurements and to
+the unknowable reality.
+
+.. image:: doc-resources/case02-04.png
+    :width: 500px
+    :align: center
+    :height: 500px
+
+.. image:: doc-resources/case02-05.png
+    :width: 500px
+    :align: center
+    :height: 500px
+
+the result of our GPS correction tool respects the provided mutual
+distances, and uses the full set of GPS points to better approximate
+reality.
